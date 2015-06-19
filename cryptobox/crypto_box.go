@@ -3,6 +3,7 @@ package cryptobox
 // #include <stdio.h>
 // #include <sodium.h>
 import "C"
+import "github.com/GoKillers/go-nacl/support"
 
 func CryptoBoxSeedBytes() int {
 	return int(C.crypto_box_seedbytes())
@@ -45,7 +46,7 @@ func CryptoBoxBoxZeroBytes() int {
 }
 
 func CryptoBoxSeedKeyPair(seed []byte) ([]byte, []byte, int) {
-	checkSize(seed, CryptoBoxSeedBytes(), "seed")
+	support.CheckSize(seed, CryptoBoxSeedBytes(), "seed")
 	sk := make([]byte, CryptoBoxSecretKeyBytes())
 	pk := make([]byte, CryptoBoxPublicKeyBytes())
 	exit := int(C.crypto_box_seed_keypair(
@@ -67,13 +68,13 @@ func CryptoBoxKeyPair() ([]byte, []byte, int) {
 }
 
 func CryptoBoxEasy(m []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(pk, CryptoBoxPublicKeyBytes(), "public key")
-	checkSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
+	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
 	c := make([]byte, len(m)+CryptoBoxMacBytes())
 	exit := int(C.crypto_box_easy(
 		(*C.uchar)(&c[0]),
-		(*C.uchar)(m[0]),
+		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&pk[0]),
@@ -83,12 +84,12 @@ func CryptoBoxEasy(m []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
 }
 
 func CryptoBoxOpenEasy(c []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(pk, CryptoBoxPublicKeyBytes(), "public key")
-	checkSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
+	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
 	m := make([]byte, len(c)-CryptoBoxMacBytes())
 	exit := int(C.crypto_box_easy(
-		(*C.uchar)(m[0]),
+		(*C.uchar)(&m[0]),
 		(*C.uchar)(&c[0]),
 		(C.ulonglong)(len(c)),
 		(*C.uchar)(&n[0]),
@@ -99,15 +100,15 @@ func CryptoBoxOpenEasy(c []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
 }
 
 func CryptoBoxDetached(mac []byte, m []byte, n[] byte, pk []byte, sk []byte) ([]byte, int) {
-	checkSize(mac, CryptoBoxMacBytes(), "mac")
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(pk, CryptoBoxPublicKeyBytes(), "public key")
-	checkSize(sk, CryptoBoxSecretKeyBytes(), "sender's secret key")
+	support.CheckSize(mac, CryptoBoxMacBytes(), "mac")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
+	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "sender's secret key")
 	c := make([]byte, len(m)+CryptoBoxMacBytes())
 	exit := int(C.crypto_box_detached(
 		(*C.uchar)(&c[0]),
 		(*C.uchar)(&mac[0]),
-		(*C.uchar)(m[0]),
+		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&pk[0]),
@@ -117,10 +118,10 @@ func CryptoBoxDetached(mac []byte, m []byte, n[] byte, pk []byte, sk []byte) ([]
 }
 
 func CryptoBoxOpenDetached(c []byte, mac []byte, n[] byte, pk []byte, sk []byte) ([]byte, int) {
-	checkSize(mac, CryptoBoxMacBytes(), "mac")
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(pk, CryptoBoxPublicKeyBytes(), "public key")
-	checkSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
+	support.CheckSize(mac, CryptoBoxMacBytes(), "mac")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
+	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
 	m := make([]byte, len(c)-CryptoBoxMacBytes())
 	exit := int(C.crypto_box_detached(
 		(*C.uchar)(&m[0]),
@@ -135,8 +136,8 @@ func CryptoBoxOpenDetached(c []byte, mac []byte, n[] byte, pk []byte, sk []byte)
 }
 
 func CryptoBoxBeforeNm(pk []byte, sk []byte) ([]byte, int) {
-	checkSize(pk, CryptoBoxPublicKeyBytes(), "public key")
-	checkSize(sk, CryptoBoxSecretKeyBytes(), "sender's secret key")
+	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
+	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "sender's secret key")
 	k := make([]byte, CryptoBoxBeforeNmBytes())
 	exit := int(C.crypto_box_beforenm(
 		(*C.uchar)(&k[0]),
@@ -147,12 +148,12 @@ func CryptoBoxBeforeNm(pk []byte, sk []byte) ([]byte, int) {
 }
 
 func CryptoBoxEasyAfterNm(m []byte, n []byte, k []byte) ([]byte, int) {
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
 	c:= make([]byte, len(m)+CryptoBoxMacBytes())
 	exit := int(C.crypto_box_easy_afternm(
 		(*C.uchar)(&c[0]),
-		(*C.uchar)(m[0]),
+		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&k[0])))
@@ -161,8 +162,8 @@ func CryptoBoxEasyAfterNm(m []byte, n []byte, k []byte) ([]byte, int) {
 }
 
 func CryptoBoxOpenEasyAfterNm(c []byte, n []byte, k []byte) ([]byte, int) {
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
 	m := make([]byte, len(c)-CryptoBoxMacBytes())
 	exit := int(C.crypto_box_open_easy_afternm(
 		(*C.uchar)(&m[0]),
@@ -175,14 +176,14 @@ func CryptoBoxOpenEasyAfterNm(c []byte, n []byte, k []byte) ([]byte, int) {
 }
 
 func CryptoBoxDetachedAfterNm(mac []byte, m []byte, n []byte, k []byte) ([]byte, int) {
-	checkSize(mac, CryptoBoxMacBytes(), "mac")
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
+	support.CheckSize(mac, CryptoBoxMacBytes(), "mac")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
 	c := make([]byte, len(m)+CryptoBoxMacBytes())
 	exit := int(C.crypto_box_detached_afternm(
 		(*C.uchar)(&c[0]),
 		(*C.uchar)(&mac[0]),
-		(*C.uchar)(m[0]),
+		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&k[0])))
@@ -191,9 +192,9 @@ func CryptoBoxDetachedAfterNm(mac []byte, m []byte, n []byte, k []byte) ([]byte,
 }
 
 func CryptoBoxOpenDetachedAfterNm(c []byte, mac []byte, n []byte, k []byte) ([]byte, int) {
-	checkSize(mac, CryptoBoxMacBytes(), "mac")
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
+	support.CheckSize(mac, CryptoBoxMacBytes(), "mac")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
 	m := make([]byte, len(c)-CryptoBoxMacBytes())
 	exit := int(C.crypto_box_open_detached_afternm(
 		(*C.uchar)(&m[0]),
@@ -207,11 +208,11 @@ func CryptoBoxOpenDetachedAfterNm(c []byte, mac []byte, n []byte, k []byte) ([]b
 }
 
 func CryptoBoxSeal(m []byte, pk []byte) ([]byte, int) {
-	checkSize(pk, CryptoBoxPublicKeyBytes(), "public key")
-	c := make([]byte, len(c)+CryptoBoxMacBytes())
+	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
+	c := make([]byte, len(m)+CryptoBoxMacBytes())
 	exit := int(C.crypto_box_seal(
 		(*C.uchar)(&c[0]),
-		(*C.uchar)(m[0]),
+		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&pk[0])))
 
@@ -219,8 +220,8 @@ func CryptoBoxSeal(m []byte, pk []byte) ([]byte, int) {
 }
 
 func CryptoBoxSealOpen(c []byte, pk []byte, sk []byte) ([]byte, int){
-	checkSize(pk, CryptoBoxPublicKeyBytes(), "public key")
-	checkSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
+	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
+	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
 	m := make([]byte, len(c)-CryptoBoxMacBytes())
 	exit := int(C.crypto_box_seal_open(
 		(*C.uchar)(&m[0]),
@@ -233,13 +234,13 @@ func CryptoBoxSealOpen(c []byte, pk []byte, sk []byte) ([]byte, int){
 }
 
 func CryptoBox(m []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(pk, CryptoBoxPublicKeyBytes(), "public key")
-	checkSize(sk, CryptoBoxSecretKeyBytes(), "sender's secret key")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
+	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "sender's secret key")
 	c := make([]byte, len(m))
 	exit := int(C.crypto_box(
 		(*C.uchar)(&c[0]),
-		(*C.uchar)(m[0]),
+		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&pk[0]),
@@ -249,9 +250,9 @@ func CryptoBox(m []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
 }
 
 func CryptoBoxOpen(c []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(pk, CryptoBoxPublicKeyBytes(), "public key")
-	checkSize(sk, CryptoBoxPublicKeyBytes(), "secret key")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
+	support.CheckSize(sk, CryptoBoxPublicKeyBytes(), "secret key")
 	m := make([]byte, len(c))
 	exit := int(C.crypto_box_open(
 		(*C.uchar)(&m[0]),
@@ -265,12 +266,12 @@ func CryptoBoxOpen(c []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
 }
 
 func CryptoBoxAfterNm(m []byte, n []byte, k []byte) ([]byte, int) {
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
 	c := make([]byte, len(m))
 	exit := int(C.crypto_box_afternm(
 		(*C.uchar)(&c[0]),
-		(*C.uchar)(m[0]),
+		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&k[0])))
@@ -279,8 +280,8 @@ func CryptoBoxAfterNm(m []byte, n []byte, k []byte) ([]byte, int) {
 }
 
 func CryptoBoxOpenAfteNm(c []byte, n []byte, k []byte) ([]byte, int) {
-	checkSize(n, CryptoBoxNonceBytes(), "nonce")
-	checkSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
+	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
+	support.CheckSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
 	m := make([]byte, len(c))
 	exit := int(C.crypto_box_afternm(
 		(*C.uchar)(&m[0]),
