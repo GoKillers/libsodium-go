@@ -1,7 +1,5 @@
-package nacl
+package cryptobox
 
-// #cgo CFLAGS: -I/usr/local/include/sodium
-// #cgo LDFLAGS: /usr/local/lib/libsodium.a
 // #include <stdio.h>
 // #include <sodium.h>
 import "C"
@@ -108,7 +106,7 @@ func CryptoBoxDetached(mac []byte, m []byte, n[] byte, pk []byte, sk []byte) ([]
 	c := make([]byte, len(m)+CryptoBoxMacBytes())
 	exit := int(C.crypto_box_detached(
 		(*C.uchar)(&c[0]),
-		(*C.uchar)(&mac[0])
+		(*C.uchar)(&mac[0]),
 		(*C.uchar)(m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&n[0]),
@@ -125,10 +123,10 @@ func CryptoBoxOpenDetached(c []byte, mac []byte, n[] byte, pk []byte, sk []byte)
 	checkSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
 	m := make([]byte, len(c)-CryptoBoxMacBytes())
 	exit := int(C.crypto_box_detached(
-		(*C.uchar)(&m[0])
+		(*C.uchar)(&m[0]),
 		(*C.uchar)(&c[0]),
-		(*C.uchar)(&mac[0])
-		(C.ulonglong)(len(c))
+		(*C.uchar)(&mac[0]),
+		(C.ulonglong)(len(c)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&pk[0]),
 		(*C.uchar)(&sk[0])))
@@ -208,7 +206,7 @@ func CryptoBoxOpenDetachedAfterNm(c []byte, mac []byte, n []byte, k []byte) ([]b
 	return m, exit
 }
 
-func CryptoBoxSeal(m []byte, pk []byte) ([]byte, int) ([]byte, int) {
+func CryptoBoxSeal(m []byte, pk []byte) ([]byte, int) {
 	checkSize(pk, CryptoBoxPublicKeyBytes(), "public key")
 	c := make([]byte, len(c)+CryptoBoxMacBytes())
 	exit := int(C.crypto_box_seal(
@@ -292,10 +290,4 @@ func CryptoBoxOpenAfteNm(c []byte, n []byte, k []byte) ([]byte, int) {
 		(*C.uchar)(&k[0])))
 
 	return m, exit
-}
-
-func checkSize(buf []byte, expected int, descrip string) {
-	if len(buf) != expected {
-		panic(fmt.Sprintf("Incorrect %s buffer size, expected (%d), got (%d).", descrip, expected, len(buf)))
-	}
 }
