@@ -24,7 +24,7 @@ func MemCmp(buff1, buff2 []byte, length int) int {
 }
 
 func Bin2hex(bin []byte) string {
-	maxlen := len(bin) * 2
+	maxlen := len(bin) * 2 + 1
 	binPtr := (*C.uchar)(unsafe.Pointer(&bin[0]))
 	buf := (*C.char)(C.malloc(C.size_t(maxlen)))
 	defer C.free(unsafe.Pointer(buf))
