@@ -1,6 +1,7 @@
 package cryptobox
 
-// #include <stdio.h>
+// #cgo pkg-config: libsodium
+// #include <stdlib.h>
 // #include <sodium.h>
 import "C"
 import "github.com/GoKillers/go-nacl/support"

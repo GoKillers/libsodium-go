@@ -2,7 +2,8 @@ package sodium
 
 import "fmt"
 
-// #include <stdio.h>
+// #cgo pkg-config: libsodium
+// #include <stdlib.h>
 // #include <sodium.h>
 import "C"
 

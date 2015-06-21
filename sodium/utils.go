@@ -3,7 +3,8 @@ package sodium
 import "fmt"
 import "unsafe"
 
-// #include <stdio.h>
+// #cgo pkg-config: libsodium
+// #include <stdlib.h>
 // #include <sodium.h>
 import "C"
 
