@@ -4,7 +4,7 @@ package cryptobox
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/go-nacl/support"
+import "github.com/GoKillers/libsodium-go/support"
 
 func CryptoBoxSeal(m []byte, pk []byte) ([]byte, int) {
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
@@ -18,7 +18,7 @@ func CryptoBoxSeal(m []byte, pk []byte) ([]byte, int) {
 	return c, exit
 }
 
-func CryptoBoxSealOpen(c []byte, pk []byte, sk []byte) ([]byte, int){
+func CryptoBoxSealOpen(c []byte, pk []byte, sk []byte) ([]byte, int) {
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
 	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
 	m := make([]byte, len(c)-CryptoBoxMacBytes())

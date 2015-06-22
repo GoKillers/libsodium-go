@@ -4,7 +4,7 @@ package cryptobox
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/go-nacl/support"
+import "github.com/GoKillers/libsodium-go/support"
 
 func CryptoBoxDetachedAfterNm(mac []byte, m []byte, n []byte, k []byte) ([]byte, int) {
 	support.CheckSize(mac, CryptoBoxMacBytes(), "mac")
@@ -22,7 +22,7 @@ func CryptoBoxDetachedAfterNm(mac []byte, m []byte, n []byte, k []byte) ([]byte,
 	return c, exit
 }
 
-func CryptoBoxDetached(mac []byte, m []byte, n[] byte, pk []byte, sk []byte) ([]byte, int) {
+func CryptoBoxDetached(mac []byte, m []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
 	support.CheckSize(mac, CryptoBoxMacBytes(), "mac")
 	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
@@ -43,7 +43,7 @@ func CryptoBoxDetached(mac []byte, m []byte, n[] byte, pk []byte, sk []byte) ([]
 func CryptoBoxEasyAfterNm(m []byte, n []byte, k []byte) ([]byte, int) {
 	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
 	support.CheckSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
-	c:= make([]byte, len(m)+CryptoBoxMacBytes())
+	c := make([]byte, len(m)+CryptoBoxMacBytes())
 	exit := int(C.crypto_box_easy_afternm(
 		(*C.uchar)(&c[0]),
 		(*C.uchar)(&m[0]),
@@ -86,7 +86,7 @@ func CryptoBoxOpenDetachedAfterNm(c []byte, mac []byte, n []byte, k []byte) ([]b
 	return m, exit
 }
 
-func CryptoBoxOpenDetached(c []byte, mac []byte, n[] byte, pk []byte, sk []byte) ([]byte, int) {
+func CryptoBoxOpenDetached(c []byte, mac []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
 	support.CheckSize(mac, CryptoBoxMacBytes(), "mac")
 	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")

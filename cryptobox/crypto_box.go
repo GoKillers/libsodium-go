@@ -4,7 +4,7 @@ package cryptobox
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/go-nacl/support"
+import "github.com/GoKillers/libsodium-go/support"
 
 func CryptoBoxSeedBytes() int {
 	return int(C.crypto_box_seedbytes())
