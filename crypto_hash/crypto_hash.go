@@ -4,7 +4,6 @@ package cryptohash
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/libsodium-go/support"
 
 func CryptoHashBytes() int {
 	return int(C.crypto_hash_bytes())
