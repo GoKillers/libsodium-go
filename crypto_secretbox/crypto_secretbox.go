@@ -27,7 +27,7 @@ func CryptoSecretBoxMacBytes() int {
 }
 
 func CryptoSecretBoxPrimitive() string {
-	C.GoString(C.crypto_secretbox_primitive())
+	return C.GoString(C.crypto_secretbox_primitive())
 }
 
 func CryptoSecretBox(m []byte, n []byte, k []byte) ([]byte, int) {

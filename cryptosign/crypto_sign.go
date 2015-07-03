@@ -51,40 +51,46 @@ func CryptoSignKeyPair() ([]byte, []byte, int) {
 func CryptoSign(m []byte, sk []byte) ([]byte, int) {
 	support.CheckSize(sk, CryptoSignSecretKeyBytes(), "secret key")
 	sm := make([]byte, len(m)+CryptoSignBytes())
+	var actualSmSize C.ulonglong
+
 	exit := int(C.crypto_sign(
 		(*C.uchar)(&sm[0]),
-		(C.ulonglong)(len(sm)),
+		(&actualSmSize),
 		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&sk[0])))
 
-	return sm, exit
+		return sm[:actualSmSize], exit
 }
 
 func CryptoSignOpen(sm []byte, pk []byte) ([]byte, int) {
 	support.CheckSize(pk, CryptoSignPublicKeyBytes(), "public key")
 	m := make([]byte, len(sm)-CryptoSignBytes())
+	var actualMSize C.ulonglong
+
 	exit := int(C.crypto_sign_open(
 		(*C.uchar)(&m[0]),
-		(C.ulonglong)(len(m)),
+		(&actualMSize),
 		(*C.uchar)(&sm[0]),
 		(C.ulonglong)(len(sm)),
 		(*C.uchar)(&pk[0])))
 
-	return m, exit
+		return m[:actualMSize], exit
 }
 
 func CryptoSignDetached(m []byte, sk []byte) ([]byte, int) {
 	support.CheckSize(sk, CryptoSignSecretKeyBytes(), "secret key")
 	sig := make([]byte, CryptoSignBytes())
+	var actualSigSize C.ulonglong
+
 	exit := int(C.crypto_sign_detached(
 		(*C.uchar)(&sig[0]),
-		(C.ulonglong)(len(sig)),
+		(&actualSigSize),
 		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&sk[0])))
 
-	return sig, exit
+		return sig[:actualSigSize], exit
 }
 
 func CryptoSignVerifyDetached(sig []byte, m []byte, pk []byte) int {
