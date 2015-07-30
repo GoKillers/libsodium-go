@@ -11,7 +11,7 @@ Team (as of now...)
 ----------------
 <ul>
 <li>Stephen Chavez (@redragonx)</li>
-<li>Graham Smith (@neuegram)</l>i
+<li>Graham Smith (@neuegram)</l>
 </ul>
 
 
