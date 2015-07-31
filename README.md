@@ -15,7 +15,7 @@ Team (as of now...)
 </ul>
 
 How to build
-
+------------
 For linux, this should be easy since there's pkg-config support. Please make sure libsodium is installed on your system first.
 
 1. `go get -d github.com/GoKillers/libsodium-go`
