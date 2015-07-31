@@ -122,7 +122,7 @@ func CryptoBoxAfterNm(m []byte, n []byte, k []byte) ([]byte, int) {
 	return c, exit
 }
 
-func CryptoBoxOpenAfteNm(c []byte, n []byte, k []byte) ([]byte, int) {
+func CryptoBoxOpenAfterNm(c []byte, n []byte, k []byte) ([]byte, int) {
 	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
 	support.CheckSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
 	m := make([]byte, len(c))
