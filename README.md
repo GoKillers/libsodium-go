@@ -14,7 +14,16 @@ Team (as of now...)
 <li>Graham Smith (@neuegram)</l>
 </ul>
 
+How to build
 
-Licence
+For linux, this should be easy since there's pkg-config support. Please make sure libsodium is installed on your system first.
+
+1. `go get -d github.com/GoKillers/libsodium-go`
+2. `cd into the root of libsodium-go`
+3. `./build.sh`
+
+For Windows, we need help here. Do a pull request if you know how to compile this on Windows.
+
+License
 ---------
 Copyright 2015 - GoKillers
