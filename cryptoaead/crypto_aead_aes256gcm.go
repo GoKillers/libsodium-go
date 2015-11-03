@@ -27,7 +27,7 @@ func CryptoAEADAES256GCMStateBytes() int {
 }
 
 func CryptoAESAES256GCMIsAvailable() int {
-	return int(C.crypto_aes_aes256gcm_is_available())
+	return int(C.crypto_aead_aes256gcm_is_available())
 }
 
 func CryptoAEADAES256GCMEncrypt(m []byte, ad []byte, nsec []byte, npub []byte, k []byte) ([]byte, int) {
