@@ -5,10 +5,6 @@ package sodium
 // #include <sodium.h>
 import "C"
 
-func RuntimeGetCpuFeatures() int {
-	return int(C.sodium_runtime_get_cpu_features())
-}
-
 func RuntimeHasNeon() bool {
 	return C.sodium_runtime_has_neon() != 0
 }

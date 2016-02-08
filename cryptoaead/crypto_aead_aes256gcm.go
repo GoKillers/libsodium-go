@@ -34,9 +34,11 @@ func CryptoAEADAES256GCMEncrypt(m []byte, ad []byte, nsec []byte, npub []byte, k
 	support.CheckSize(k, CryptoAEADAES256GCMKeyBytes(), "secret key")
 	support.CheckSize(npub, CryptoAEADAES256GCMNPubBytes(), "public nonce")
 	c := make([]byte, len(m)+CryptoAEADAES256GCMABytes())
+	cLen := len(c)
+	cLenLongLong := (C.ulonglong(cLen))
 	exit := int(C.crypto_aead_aes256gcm_encrypt(
 		(*C.uchar)(&c[0]),
-		(C.ulonglong)(len(c)),
+		&cLenLongLong,
 		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&ad[0]),
@@ -52,9 +54,12 @@ func CryptoAEADAES256GCMDecrypt(nsec []byte, c []byte, ad []byte, npub []byte, k
 	support.CheckSize(k, CryptoAEADAES256GCMKeyBytes(), "secret key")
 	support.CheckSize(npub, CryptoAEADAES256GCMNPubBytes(), "public nonce")
 	m := make([]byte, len(c)-CryptoAEADAES256GCMABytes())
+	mLen := len(m)
+	mLenLongLong := (C.ulonglong)(mLen)
+
 	exit := int(C.crypto_aead_aes256gcm_decrypt(
 		(*C.uchar)(&m[0]),
-		(C.ulonglong)(len(m)),
+		&mLenLongLong,
 		(*C.uchar)(&nsec[0]),
 		(*C.uchar)(&c[0]),
 		(C.ulonglong)(len(c)),
