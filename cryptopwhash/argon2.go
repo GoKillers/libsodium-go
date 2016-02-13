@@ -4,7 +4,7 @@ package cryptopwhash
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-_ import "github.com/GoKillers/libsodium-go/support"
+import _ "github.com/GoKillers/libsodium-go/support"
 
 func Argon2iHashRaw(tCost int,
 					mCost int,
