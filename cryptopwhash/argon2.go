@@ -42,8 +42,7 @@ func Argon2iHashEncoded(tCost int, mCost int, parallelism int, pwd []byte, pwdLe
 		(*C.ulonglong)(len(salt)),
 		(*C.ulonglong)(hashLen),
 		(*C.uchar)(&encoded[0]),
-		(*C.ulonglong)(len(encoded))
-	))
+		(*C.ulonglong)(len(encoded))))
 
 	return encoded, exit
 }
