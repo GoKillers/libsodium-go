@@ -22,7 +22,13 @@ For linux, this should be easy since there's pkg-config support. Please make sur
 2. `cd $GOPATH/src/github.com/GoKillers/libsodium-go`
 3. `./build.sh`
 
-For Windows, we need help here. Do a pull request if you know how to compile this on Windows.
+For Windows, this requires a little more work.
+
+1. Download and install pkg-config for [win32](http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/) or [win64](http://ftp.gnome.org/pub/gnome/binaries/win64/dependencies/)
+2. Add a system or user variable PKG_CONFIG_PATH pointing to a folder containing pkg-config files, including libsodium
+3. `go get -d github.com/GoKillers/libsodium-go`
+4. `cd %GOPATH%/src/github.com/GoKillers/libsodium-go`
+5. `build.bat`
 
 License
 ---------
