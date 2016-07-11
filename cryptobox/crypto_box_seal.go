@@ -8,7 +8,7 @@ import "github.com/GoKillers/libsodium-go/support"
 
 func CryptoBoxSeal(m []byte, pk []byte) ([]byte, int) {
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
-	c := make([]byte, len(m)+CryptoBoxMacBytes())
+	c := make([]byte, len(m)+CryptoBoxSealBytes())
 	exit := int(C.crypto_box_seal(
 		(*C.uchar)(&c[0]),
 		(*C.uchar)(&m[0]),
@@ -21,7 +21,7 @@ func CryptoBoxSeal(m []byte, pk []byte) ([]byte, int) {
 func CryptoBoxSealOpen(c []byte, pk []byte, sk []byte) ([]byte, int) {
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
 	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
-	m := make([]byte, len(c)-CryptoBoxMacBytes())
+	m := make([]byte, len(c)-CryptoBoxSealBytes())
 	exit := int(C.crypto_box_seal_open(
 		(*C.uchar)(&m[0]),
 		(*C.uchar)(&c[0]),
