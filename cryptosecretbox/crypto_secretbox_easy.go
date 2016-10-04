@@ -4,7 +4,7 @@ package secretbox
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/libsodium-go/support"
+import "github.com/mtaylor91/libsodium-go/support"
 
 func CryptoSecretBoxDetached(m []byte, n []byte, k []byte) ([]byte, []byte, int) {
 	support.CheckSize(n, CryptoSecretBoxNonceBytes(), "nonce")

@@ -4,7 +4,7 @@ package cryptoaead
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/libsodium-go/support"
+import "github.com/mtaylor91/libsodium-go/support"
 
 func CryptoAEADAES256GCMKeyBytes() int {
 	return int(C.crypto_aead_aes256gcm_keybytes())
