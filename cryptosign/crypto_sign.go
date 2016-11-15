@@ -4,6 +4,7 @@ package cryptosign
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
+import "github.com/GoKillers/libsodium-go/cryptobox"
 import "github.com/GoKillers/libsodium-go/support"
 
 func CryptoSignBytes() int {
@@ -60,7 +61,7 @@ func CryptoSign(m []byte, sk []byte) ([]byte, int) {
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&sk[0])))
 
-		return sm[:actualSmSize], exit
+	return sm[:actualSmSize], exit
 }
 
 func CryptoSignOpen(sm []byte, pk []byte) ([]byte, int) {
@@ -75,7 +76,7 @@ func CryptoSignOpen(sm []byte, pk []byte) ([]byte, int) {
 		(C.ulonglong)(len(sm)),
 		(*C.uchar)(&pk[0])))
 
-		return m[:actualMSize], exit
+	return m[:actualMSize], exit
 }
 
 func CryptoSignDetached(m []byte, sk []byte) ([]byte, int) {
@@ -90,7 +91,7 @@ func CryptoSignDetached(m []byte, sk []byte) ([]byte, int) {
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&sk[0])))
 
-		return sig[:actualSigSize], exit
+	return sig[:actualSigSize], exit
 }
 
 func CryptoSignVerifyDetached(sig []byte, m []byte, pk []byte) int {
@@ -102,4 +103,26 @@ func CryptoSignVerifyDetached(sig []byte, m []byte, pk []byte) int {
 		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&pk[0])))
+}
+
+func CryptoSignEd25519PkToCurve25519(pkEd25519 []byte) ([]byte, int) {
+	support.CheckSize(pkEd25519, CryptoSignPublicKeyBytes(), "public key")
+	pkCurve25519 := make([]byte, cryptobox.CryptoBoxPublicKeyBytes())
+
+	exit := int(C.crypto_sign_ed25519_pk_to_curve25519(
+		(*C.uchar)(&pkCurve25519[0]),
+		(*C.uchar)(&pkEd25519[0])))
+
+	return pkCurve25519, exit
+}
+
+func CryptoSignEd25519SkToCurve25519(skEd25519 []byte) ([]byte, int) {
+	support.CheckSize(skEd25519, CryptoSignSecretKeyBytes(), "secret key")
+	skCurve25519 := make([]byte, cryptobox.CryptoBoxSecretKeyBytes())
+
+	exit := int(C.crypto_sign_ed25519_sk_to_curve25519(
+		(*C.uchar)(&skCurve25519[0]),
+		(*C.uchar)(&skEd25519[0])))
+
+	return skCurve25519, exit
 }
