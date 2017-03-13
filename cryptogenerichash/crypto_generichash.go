@@ -41,14 +41,21 @@ func CryptoGenericHashStateBytes() int {
 // I took care of the typedef confusions. This should work okay.
 func CryptoGenericHash(outlen int, in []byte, key []byte) ([]byte, int) {
 	support.CheckSizeInRange(outlen, CryptoGenericHashBytesMin(), CryptoGenericHashBytesMax(), "out")
-	support.CheckSizeInRange(len(key), CryptoGenericHashKeyBytesMin(), CryptoGenericHashKeyBytesMax(), "key")
+
+	// Handle hashes with a key
+	k := (*byte)(nil)
+	if len(key) > 0 {
+		support.CheckSizeInRange(len(key), CryptoGenericHashKeyBytesMin(), CryptoGenericHashKeyBytesMax(), "key")
+		k = &key[0]
+	}
+
 	out := make([]byte, outlen)
 	exit := int(C.crypto_generichash(
 		(*C.uchar)(&out[0]),
 		(C.size_t)(outlen),
 		(*C.uchar)(&in[0]),
 		(C.ulonglong)(len(in)),
-		(*C.uchar)(&key[0]),
+		(*C.uchar)(k),
 		(C.size_t)(len(key))))
 
 	return out, exit
