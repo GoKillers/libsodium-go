@@ -41,9 +41,8 @@ func CryptoStreamSalsa2012XOR(m []byte, n []byte, k []byte) ([]byte, int) {
 	return c, exit
 }
 
-// Requires 1.0.12
-//func CryptoStreamSalsa2012Keygen() []byte {
-//	c := make([]byte, CryptoStreamSalsa2012KeyBytes())
-//	C.crypto_stream_salsa2012_keygen((*C.uchar)(&c[0]))
-//	return c
-//}
+func CryptoStreamSalsa2012Keygen() []byte {
+	c := make([]byte, CryptoStreamSalsa2012KeyBytes())
+	C.crypto_stream_salsa2012_keygen((*C.uchar)(&c[0]))
+	return c
+}
