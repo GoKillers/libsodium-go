@@ -92,7 +92,7 @@ func CryptoBoxOpenDetached(c []byte, mac []byte, n []byte, pk []byte, sk []byte)
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
 	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
 	m := make([]byte, len(c)-CryptoBoxMacBytes())
-	exit := int(C.crypto_box_detached(
+	exit := int(C.crypto_box_open_detached(
 		(*C.uchar)(&m[0]),
 		(*C.uchar)(&c[0]),
 		(*C.uchar)(&mac[0]),
@@ -123,7 +123,7 @@ func CryptoBoxOpenEasy(c []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
 	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
 	m := make([]byte, len(c)-CryptoBoxMacBytes())
-	exit := int(C.crypto_box_easy(
+	exit := int(C.crypto_box_open_easy(
 		(*C.uchar)(&m[0]),
 		(*C.uchar)(&c[0]),
 		(C.ulonglong)(len(c)),
