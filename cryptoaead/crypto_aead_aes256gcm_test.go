@@ -18,7 +18,7 @@ type Test struct {
 func TestCryptoAEADAES256GCM(t *testing.T) {
 	// Skip the test if unsupported on this platform
 	if !CryptoAEADAES256GCMIsAvailable() {
-		t.Skip()
+		t.Skip("The CPU does not support this implementation of AES256GCM.")
 	}
 
 	// Test the key generation
