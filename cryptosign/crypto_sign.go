@@ -4,8 +4,8 @@ package cryptosign
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/libsodium-go/cryptobox"
-import "github.com/GoKillers/libsodium-go/support"
+import "github.com/mtaylor91/libsodium-go/cryptobox"
+import "github.com/mtaylor91/libsodium-go/support"
 
 func CryptoSignBytes() int {
 	return int(C.crypto_sign_bytes())

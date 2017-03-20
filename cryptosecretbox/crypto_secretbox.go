@@ -4,7 +4,7 @@ package secretbox
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/libsodium-go/support"
+import "github.com/mtaylor91/libsodium-go/support"
 
 func CryptoSecretBoxKeyBytes() int {
 	return int(C.crypto_secretbox_keybytes())

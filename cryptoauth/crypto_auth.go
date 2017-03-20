@@ -4,7 +4,7 @@ package cryptoauth
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/libsodium-go/support"
+import "github.com/mtaylor91/libsodium-go/support"
 
 func CryptoAuthBytes() int {
 	return int(C.crypto_auth_bytes())
@@ -21,7 +21,7 @@ func CryptoAuthPrimitive() string {
 func CryptoAuth(in []byte, key []byte) ([]byte, int) {
 	support.CheckSize(key, CryptoAuthKeyBytes(), "key")
 	inlen := len(in)
-	out := make([]byte, inlen + CryptoAuthBytes())
+	out := make([]byte, inlen+CryptoAuthBytes())
 
 	exit := int(C.crypto_auth(
 		(*C.uchar)(&out[0]),
@@ -29,7 +29,7 @@ func CryptoAuth(in []byte, key []byte) ([]byte, int) {
 		(C.ulonglong)(inlen),
 		(*C.uchar)(&key[0])))
 
-		return out, exit
+	return out, exit
 }
 
 func CryptoAuthVerify(hmac []byte, in []byte, key []byte) int {
@@ -42,5 +42,5 @@ func CryptoAuthVerify(hmac []byte, in []byte, key []byte) int {
 		(C.ulonglong)(inlen),
 		(*C.uchar)(&key[0])))
 
-		return exit
+	return exit
 }
