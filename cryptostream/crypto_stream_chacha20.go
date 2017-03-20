@@ -57,17 +57,14 @@ func CryptoStreamChaCha20XORIC(m []byte, n []byte, ic uint64, k []byte) ([]byte,
 	return c, exit
 }
 
-// Requires 1.0.12
-//func CryptoStreamChaCha20Keygen() []byte {
-//	c := make([]byte, CryptoStreamChaCha20KeyBytes())
-//	C.crypto_stream_chacha20_keygen((*C.uchar)(&c[0]))
-//	return c
-//}
+func CryptoStreamChaCha20Keygen() []byte {
+	c := make([]byte, CryptoStreamChaCha20KeyBytes())
+	C.crypto_stream_chacha20_keygen((*C.uchar)(&c[0]))
+	return c
+}
 
 func CryptoStreamChaCha20IETFKeyBytes() int {
-	// Requires 1.0.12
-	// return int(C.crypto_stream_chacha20_ietf_keybytes())
-	return CryptoStreamChaCha20KeyBytes()
+	return int(C.crypto_stream_chacha20_ietf_keybytes())
 }
 
 func CryptoStreamChaCha20IETFNonceBytes() int {
@@ -117,9 +114,8 @@ func CryptoStreamChaCha20IETFXORIC(m []byte, n []byte, ic uint32, k []byte) ([]b
 	return c, exit
 }
 
-// Requires 1.0.12
-//func CryptoStreamChaCha20IETFKeygen() []byte {
-//	c := make([]byte, CryptoStreamChaCha20IETFKeyBytes())
-//	C.crypto_stream_chacha20_ietf_keygen((*C.uchar)(&c[0]))
-//	return c
-//}
+func CryptoStreamChaCha20IETFKeygen() []byte {
+	c := make([]byte, CryptoStreamChaCha20IETFKeyBytes())
+	C.crypto_stream_chacha20_ietf_keygen((*C.uchar)(&c[0]))
+	return c
+}

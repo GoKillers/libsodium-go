@@ -41,9 +41,8 @@ func CryptoStreamSalsa208XOR(m []byte, n []byte, k []byte) ([]byte, int) {
 	return c, exit
 }
 
-// Requires 1.0.12
-//func CryptoStreamSalsa208Keygen() []byte {
-//	c := make([]byte, CryptoStreamSalsa208KeyBytes())
-//	C.crypto_stream_salsa208_keygen((*C.uchar)(&c[0]))
-//	return c
-//}
+func CryptoStreamSalsa208Keygen() []byte {
+	c := make([]byte, CryptoStreamSalsa208KeyBytes())
+	C.crypto_stream_salsa208_keygen((*C.uchar)(&c[0]))
+	return c
+}

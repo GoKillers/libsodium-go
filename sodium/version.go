@@ -16,3 +16,7 @@ func SodiumLibaryVersionMajor() int {
 func SodiumLibaryVersionMinor() int {
 	return int(C.sodium_library_version_minor())
 }
+
+func SodiumLibaryMinimal() bool {
+	return int(C.sodium_library_minimal()) != 0
+}

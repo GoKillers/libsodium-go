@@ -57,9 +57,8 @@ func CryptoStreamSalsa20XORIC(m []byte, n []byte, ic uint64, k []byte) ([]byte, 
 	return c, exit
 }
 
-// Requires 1.0.12
-//func CryptoStreamSalsa20Keygen() []byte {
-//	c := make([]byte, CryptoStreamSalsa20KeyBytes())
-//	C.crypto_stream_salsa20_keygen((*C.uchar)(&c[0]))
-//	return c
-//}
+func CryptoStreamSalsa20Keygen() []byte {
+	c := make([]byte, CryptoStreamSalsa20KeyBytes())
+	C.crypto_stream_salsa20_keygen((*C.uchar)(&c[0]))
+	return c
+}
