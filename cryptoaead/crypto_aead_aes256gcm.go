@@ -4,7 +4,10 @@ package cryptoaead
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/libsodium-go/support"
+import (
+	"github.com/GoKillers/libsodium-go/support"
+	"unsafe"
+)
 
 func CryptoAEADAES256GCMIsAvailable() bool {
 	C.sodium_init()
@@ -31,7 +34,7 @@ func CryptoAEADAES256GCMStateBytes() int {
 	return int(C.crypto_aead_aes256gcm_statebytes())
 }
 
-func CryptoAEADAES256GCMEncrypt(m []byte, ad []byte, npub []byte, k []byte) ([]byte, int) {
+func CryptoAEADAES256GCMEncrypt(m, ad, npub, k []byte) ([]byte, int) {
 	support.CheckSize(k, CryptoAEADAES256GCMKeyBytes(), "secret key")
 	support.CheckSize(npub, CryptoAEADAES256GCMNPubBytes(), "public nonce")
 
@@ -52,7 +55,7 @@ func CryptoAEADAES256GCMEncrypt(m []byte, ad []byte, npub []byte, k []byte) ([]b
 	return c, exit
 }
 
-func CryptoAEADAES256GCMDecrypt(c []byte, ad []byte, npub []byte, k []byte) ([]byte, int) {
+func CryptoAEADAES256GCMDecrypt(c, ad, npub, k []byte) ([]byte, int) {
 	support.CheckSize(k, CryptoAEADAES256GCMKeyBytes(), "secret key")
 	support.CheckSize(npub, CryptoAEADAES256GCMNPubBytes(), "public nonce")
 	support.CheckSizeMin(c, CryptoAEADAES256GCMABytes(), "ciphertext")
@@ -74,7 +77,7 @@ func CryptoAEADAES256GCMDecrypt(c []byte, ad []byte, npub []byte, k []byte) ([]b
 	return m, exit
 }
 
-func CryptoAEADAES256GCMEncryptDetached(m []byte, ad []byte, npub []byte, k []byte) ([]byte, []byte, int) {
+func CryptoAEADAES256GCMEncryptDetached(m, ad, npub, k []byte) ([]byte, []byte, int) {
 	support.CheckSize(k, CryptoAEADAES256GCMKeyBytes(), "secret key")
 	support.CheckSize(npub, CryptoAEADAES256GCMNPubBytes(), "public nonce")
 
@@ -114,6 +117,105 @@ func CryptoAEADAES256GCMDecryptDetached(c, mac, ad, npub, k []byte) ([]byte, int
 		(C.ulonglong)(len(ad)),
 		(*C.uchar)(&npub[0]),
 		(*C.uchar)(&k[0])))
+
+	return m, exit
+}
+
+func CryptoAEADAES256CGMBeforeNM(k []byte) ([]byte, int) {
+	support.CheckSize(k, CryptoAEADAES256GCMKeyBytes(), "secret key")
+
+	ctx := make([]byte, CryptoAEADAES256GCMStateBytes())
+
+	exit := int(C.crypto_aead_aes256gcm_beforenm(
+		(*C.crypto_aead_aes256gcm_state)(unsafe.Pointer(&ctx[0])),
+		(*C.uchar)(&k[0])))
+
+	return ctx, exit
+}
+
+func CryptoAEADAES256GCMEncryptAfterNM(m, ad, npub, ctx []byte) ([]byte, int) {
+	support.CheckSize(ctx, CryptoAEADAES256GCMStateBytes(), "context")
+	support.CheckSize(npub, CryptoAEADAES256GCMNPubBytes(), "public nonce")
+
+	c := make([]byte, len(m)+CryptoAEADAES256GCMABytes())
+	cLen := C.ulonglong(len(c))
+
+	exit := int(C.crypto_aead_aes256gcm_encrypt_afternm(
+		(*C.uchar)(support.BytePointer(c)),
+		(*C.ulonglong)(&cLen),
+		(*C.uchar)(support.BytePointer(m)),
+		(C.ulonglong)(len(m)),
+		(*C.uchar)(support.BytePointer(ad)),
+		(C.ulonglong)(len(ad)),
+		(*C.uchar)(nil),
+		(*C.uchar)(&npub[0]),
+		(*[512]C.uchar)(unsafe.Pointer(&ctx[0]))))
+
+	return c, exit
+}
+
+func CryptoAEADAES256GCMDecryptAfterNM(c, ad, npub, ctx []byte) ([]byte, int) {
+	support.CheckSize(ctx, CryptoAEADAES256GCMStateBytes(), "context")
+	support.CheckSize(npub, CryptoAEADAES256GCMNPubBytes(), "public nonce")
+	support.CheckSizeMin(c, CryptoAEADAES256GCMABytes(), "ciphertext")
+
+	m := make([]byte, len(c)-CryptoAEADAES256GCMABytes())
+	mLen := (C.ulonglong)(len(m))
+
+	exit := int(C.crypto_aead_aes256gcm_decrypt_afternm(
+		(*C.uchar)(support.BytePointer(m)),
+		(*C.ulonglong)(&mLen),
+		(*C.uchar)(nil),
+		(*C.uchar)(&c[0]),
+		(C.ulonglong)(len(c)),
+		(*C.uchar)(support.BytePointer(ad)),
+		(C.ulonglong)(len(ad)),
+		(*C.uchar)(&npub[0]),
+		(*[512]C.uchar)(unsafe.Pointer(&ctx[0]))))
+
+	return m, exit
+}
+
+func CryptoAEADAES256GCMEncryptDetachedAfterNM(m, ad, npub, ctx []byte) ([]byte, []byte, int) {
+	support.CheckSize(ctx, CryptoAEADAES256GCMStateBytes(), "context")
+	support.CheckSize(npub, CryptoAEADAES256GCMNPubBytes(), "public nonce")
+
+	c := make([]byte, len(m))
+	mac := make([]byte , CryptoAEADAES256GCMABytes())
+	macLen := C.ulonglong(len(c))
+
+	exit := int(C.crypto_aead_aes256gcm_encrypt_detached_afternm(
+		(*C.uchar)(support.BytePointer(c)),
+		(*C.uchar)(&mac[0]),
+		(*C.ulonglong)(&macLen),
+		(*C.uchar)(support.BytePointer(m)),
+		(C.ulonglong)(len(m)),
+		(*C.uchar)(support.BytePointer(ad)),
+		(C.ulonglong)(len(ad)),
+		(*C.uchar)(nil),
+		(*C.uchar)(&npub[0]),
+		(*[512]C.uchar)(unsafe.Pointer(&ctx[0]))))
+
+	return c, mac, exit
+}
+
+func CryptoAEADAES256GCMDecryptDetachedAfterNM(c, mac, ad, npub, ctx []byte) ([]byte, int) {
+	support.CheckSize(ctx, CryptoAEADAES256GCMStateBytes(), "context")
+	support.CheckSize(npub, CryptoAEADAES256GCMNPubBytes(), "public nonce")
+	support.CheckSize(mac, CryptoAEADAES256GCMABytes(), "mac")
+
+	m := make([]byte, len(c))
+
+	exit := int(C.crypto_aead_aes256gcm_decrypt_detached_afternm(
+		(*C.uchar)(support.BytePointer(m)),
+		(*C.uchar)(nil),
+		(*C.uchar)(support.BytePointer(c)),
+		(C.ulonglong)(len(c)),
+		(*C.uchar)(&mac[0]),
+		(*C.uchar)(support.BytePointer(ad)),
+		(C.ulonglong)(len(ad)),
+		(*C.uchar)(&npub[0]),
+		(*[512]C.uchar)(unsafe.Pointer(&ctx[0]))))
 
 	return m, exit
 }
