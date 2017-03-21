@@ -25,21 +25,20 @@ func RandomBytes(size int) []byte {
 
 // RandomBytesBuf fills a buffer with random bytes.
 func RandomBytesBuf(buf []byte) {
-	if len(buf) > 0 {
-		C.randombytes_buf(unsafe.Pointer(&buf[0]), C.size_t(len(buf)))
-	}
+	C.randombytes_buf(
+		unsafe.Pointer(support.BytePointer(buf)),
+		C.size_t(len(buf)))
 }
 
 // RandomBytesBufDeterministic fills a buffer with bytes that are
 // indistinguishable from random bytes without knowing seed.
 func RandomBytesBufDeterministic(buf []byte, seed []byte) {
 	support.CheckSize(seed, RandomBytesSeedBytes(), "seed")
-	if len(buf) > 0 {
-		C.randombytes_buf_deterministic(
-			unsafe.Pointer(&buf[0]),
-			C.size_t(len(buf)),
-			(*C.uchar)(&seed[0]))
-	}
+
+	C.randombytes_buf_deterministic(
+		unsafe.Pointer(support.BytePointer(buf)),
+		C.size_t(len(buf)),
+		(*C.uchar)(&seed[0]))
 }
 
 // RandomBytesRandom returns a random 32 bit unsigned integer.
