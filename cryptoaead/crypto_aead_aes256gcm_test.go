@@ -46,7 +46,7 @@ func TestCryptoAEADAES256GCM(t *testing.T) {
 		f.Fuzz(&test)
 
 		// Create a key context
-		ctx, err := CryptoAEADAES256CGMBeforeNM(test.Key[:])
+		ctx, err := CryptoAEADAES256GCMBeforeNM(test.Key[:])
 		if err != 0 {
 			t.Error("Context creation failed for %+v", test)
 		}

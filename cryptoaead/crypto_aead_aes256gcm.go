@@ -121,7 +121,7 @@ func CryptoAEADAES256GCMDecryptDetached(c, mac, ad, npub, k []byte) ([]byte, int
 	return m, exit
 }
 
-func CryptoAEADAES256CGMBeforeNM(k []byte) ([]byte, int) {
+func CryptoAEADAES256GCMBeforeNM(k []byte) ([]byte, int) {
 	support.CheckSize(k, CryptoAEADAES256GCMKeyBytes(), "secret key")
 
 	ctx := make([]byte, CryptoAEADAES256GCMStateBytes())
