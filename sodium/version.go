@@ -5,18 +5,22 @@ package sodium
 // #include <sodium.h>
 import "C"
 
-func SodiumVersionString() string {
+// VersionString returns the libsodium version string
+func VersionString() string {
 	return C.GoString(C.sodium_version_string())
 }
 
-func SodiumLibaryVersionMajor() int {
+// LibraryVersionMajor returns the library major version number
+func LibraryVersionMajor() int {
 	return int(C.sodium_library_version_major())
 }
 
-func SodiumLibaryVersionMinor() int {
+// LibraryVersionMinor returns the library minor version number
+func LibraryVersionMinor() int {
 	return int(C.sodium_library_version_minor())
 }
 
-func SodiumLibaryMinimal() bool {
+// LibraryMinimal returns true for a minimal build
+func LibraryMinimal() bool {
 	return int(C.sodium_library_minimal()) != 0
 }
