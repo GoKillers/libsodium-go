@@ -1,34 +1,36 @@
 package salsa20
 
 import (
-	"testing"
 	"bytes"
 	"github.com/google/gofuzz"
+	"testing"
 )
 
 var TestCount = 100000
 
-func Test(t *testing.T) {
+func TestSalsa20(t *testing.T) {
 	// Test the key generation
-	if len(KeyGen()) != KeyBytes() {
-		t.Error("Generated key has the wrong length")
+	if *GenerateKey() == (Key{}) {
+		t.Error("Generated key is zero")
 	}
 
 	// Fuzzing
-	f := fuzz.New()
+	fm := fuzz.New()
+	fn := fuzz.New().NilChance(0)
 
 	// Run tests
 	for i := 0; i < TestCount; i++ {
-		var c, m, r, d []byte
-		var n [8]byte
+		var c, m, m2, r, d []byte
+		n := new(Nonce)
 
 		// Generate random data
-		f.Fuzz(&m)
-		f.Fuzz(&n)
-		k := KeyGen()
+		fm.Fuzz(&m)
+		fn.Fuzz(&n)
+		k := GenerateKey()
 
 		// Generate pseudo-random data
-		r = Random(len(m), n[:], k)
+		r = make([]byte, len(m))
+		KeyStream(r, n, k)
 
 		// Perform XOR
 		d = make([]byte, len(m))
@@ -37,18 +39,34 @@ func Test(t *testing.T) {
 		}
 
 		// Generate a ciphertext
-		c = XOR(m, n[:], k)
+		c = make([]byte, len(m))
+		XORKeyStream(c, m, n, k)
 		if !bytes.Equal(c, d) {
-			t.Errorf("XOR failed for m: %x, n: %x, k: %x", m, n, k)
+			t.Errorf("Encryption failed for m: %x, n: %x, k: %x", m, n, k)
 			t.FailNow()
 		}
 
-		// Generate another ciphertext
-		c = XORIC(m, n[:], 0, k)
+		// Generate one with IC
+		XORKeyStreamIC(c, m, n, k, 0)
 		if !bytes.Equal(c, d) {
-			t.Errorf("XORIC failed for m: %x, n: %x, k: %x", m, n, k)
+			t.Errorf("Encryption with IC failed for m: %x, n: %x, k: %x", m, n, k)
+			t.FailNow()
+		}
+
+		// Check if in-place encryption works
+		m2 = make([]byte, len(m))
+		copy(m2, m)
+		XORKeyStream(m2, m2, n, k)
+		if !bytes.Equal(c, m2) {
+			t.Errorf("In place encryption failed for m: %x, n: %x, k: %x", m, n, k)
+			t.FailNow()
+		}
+
+		// Check again with IC
+		XORKeyStreamIC(m, m, n, k, 0)
+		if !bytes.Equal(c, m2) {
+			t.Errorf("In place encryption with IC failed for m: %x, n: %x, k: %x", m, n, k)
 			t.FailNow()
 		}
 	}
 }
-

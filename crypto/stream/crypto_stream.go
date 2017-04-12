@@ -1,3 +1,4 @@
+// Package stream contains the libsodium bindings for the XSalsa20 stream cipher.
 package stream
 
 // #cgo pkg-config: libsodium
@@ -6,57 +7,64 @@ package stream
 import "C"
 import "github.com/GoKillers/libsodium-go/support"
 
-// KeyBytes returns the required length of a secret key
-func KeyBytes() int {
-	return int(C.crypto_stream_keybytes())
+// Sodium should always be initialised
+func init() {
+	C.sodium_init()
 }
 
-// NonceBytes returns the required length of a nonce
-func NonceBytes() int {
-	return int(C.crypto_stream_noncebytes())
-}
+// Stream byte lengths and algorithm name
+const (
+	KeyBytes   int    = C.crypto_stream_KEYBYTES   // Length of a secret key
+	NonceBytes int    = C.crypto_stream_NONCEBYTES // Length of a nonce
+	Primitive  string = C.crypto_stream_PRIMITIVE  // Name of the used algorithm
+)
 
-// Primitive returns the name of the used algorithm
-func Primitive() string {
-	return C.GoString(C.crypto_stream_primitive())
-}
+// Nonce represents a cryptographic nonce
+type Nonce [NonceBytes]byte
 
-// Random returns `clen` pseudo random bytes using a nonce `n` and a secret key `k`.
-func Random(clen int, n []byte, k []byte) []byte {
-	support.CheckSize(n, NonceBytes(), "nonce")
-	support.CheckSize(k, KeyBytes(), "key")
+// Key represents a secret key
+type Key [KeyBytes]byte
 
-	c := make([]byte, clen)
+// KeyStream fills an output buffer `c` with pseudo random bytes using a nonce `n` and a secret key `k`.
+func KeyStream(c []byte, n *Nonce, k *Key) {
+	support.NilPanic(n == nil, "nonce")
+	support.NilPanic(k == nil, "key")
+
+	if len(c) == 0 {
+		return
+	}
 
 	C.crypto_stream(
-		(*C.uchar)(support.BytePointer(c)),
-		(C.ulonglong)(clen),
+		(*C.uchar)(&c[0]),
+		(C.ulonglong)(len(c)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&k[0]))
-
-	return c
 }
 
-// XOR encrypts a message `m` using a nonce `n` and a secret key `k`.
-func XOR(m []byte, n []byte, k []byte) []byte {
-	support.CheckSize(n, NonceBytes(), "nonce")
-	support.CheckSize(k, KeyBytes(), "key")
+// XORKeyStream encrypts a message `m` using a nonce `n` and a secret key `k` and puts the resulting ciphertext into `c`.
+// If `m` and `c` are the same slice, in-place encryption is performed.
+func XORKeyStream(c, m []byte, n *Nonce, k *Key) {
+	support.NilPanic(n == nil, "nonce")
+	support.NilPanic(k == nil, "key")
+	support.CheckSizeSmaller(c, m, "output", "input")
 
-	c := make([]byte, len(m))
+	if len(c) == 0 {
+		return
+	}
 
 	C.crypto_stream_xor(
-		(*C.uchar)(support.BytePointer(c)),
-		(*C.uchar)(support.BytePointer(m)),
+		(*C.uchar)(&c[0]),
+		(*C.uchar)(&m[0]),
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&k[0]))
-
-	return c
 }
 
-// KeyGen generates a secret key
-func KeyGen() []byte {
-	c := make([]byte, KeyBytes())
+// GenerateKey generates a secret key
+func GenerateKey() *Key {
+	c := new(Key)
+
 	C.crypto_stream_keygen((*C.uchar)(&c[0]))
+
 	return c
 }
