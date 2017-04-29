@@ -1,34 +1,38 @@
+// Package hmacsha512256 contains the libsodium bindings for HMAC-SHA512 truncated to 256 bits.
 package hmacsha512256
 
 // #cgo pkg-config: libsodium
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import (
-	"github.com/GoKillers/libsodium-go/support"
-	"unsafe"
+import "github.com/GoKillers/libsodium-go/support"
+
+func init() {
+	C.sodium_init()
+}
+
+// Sizes of authentication tag and key, and the name of the used primitive.
+const (
+	Bytes    int = C.crypto_auth_hmacsha512256_BYTES
+	KeyBytes int = C.crypto_auth_hmacsha512256_KEYBYTES
 )
 
-// Bytes returns the length of an authentication tag
-func Bytes() int {
-	return int(C.crypto_auth_hmacsha512256_bytes())
-}
+// Key represents a secret key.
+type Key [KeyBytes]byte
 
-// KeyBytes returns the length of a key
-func KeyBytes() int {
-	return int(C.crypto_auth_hmacsha512256_keybytes())
-}
+// MAC represents an authentication tag.
+type MAC [Bytes]byte
 
 // StateBytes returns the length of the state
 func StateBytes() int {
 	return int(C.crypto_auth_hmacsha512256_statebytes())
 }
 
-// Auth returns the authentication tag for input data `in` and a key `k`
-func Auth(in, key []byte) []byte {
-	support.CheckSize(key, KeyBytes(), "key")
+// New returns the authentication tag for input data and a key.
+func New(in []byte, key *Key) *MAC {
+	support.NilPanic(key == nil, "key")
 
-	out := make([]byte, Bytes())
+	out := new(MAC)
 
 	C.crypto_auth_hmacsha512256(
 		(*C.uchar)(&out[0]),
@@ -39,55 +43,27 @@ func Auth(in, key []byte) []byte {
 	return out
 }
 
-// Verify if the authentication tag `h` is valid for input data `in` and key `k`.
-func Verify(h, in, key []byte) bool {
-	support.CheckSize(h, Bytes(), "hmac")
-	support.CheckSize(key, KeyBytes(), "key")
+// CheckMAC if the authentication tag is valid for input data and a key.
+func CheckMAC(in []byte, h *MAC, key *Key) (err error) {
+	support.NilPanic(h == nil, "hmac")
+	support.NilPanic(key == nil, "key")
 
-	exit := int(C.crypto_auth_hmacsha512256_verify(
+	exit := C.crypto_auth_hmacsha512256_verify(
 		(*C.uchar)(&h[0]),
 		(*C.uchar)(support.BytePointer(in)),
 		(C.ulonglong)(len(in)),
-		(*C.uchar)(&key[0])))
+		(*C.uchar)(&key[0]))
 
-	return exit == 0
+	if exit != 0 {
+		err = support.VerificationError{}
+	}
+
+	return
 }
 
-// Init initialises a state using a key.
-func Init(key []byte) []byte {
-	state := make([]byte, StateBytes())
-
-	C.crypto_auth_hmacsha512256_init(
-		(*C.crypto_auth_hmacsha512256_state)(unsafe.Pointer(&state[0])),
-		(*C.uchar)(support.BytePointer(key)),
-		(C.size_t)(len(key)))
-
-	return state
-}
-
-// Update the state with input data `in`.
-func Update(state, in []byte) {
-	C.crypto_auth_hmacsha512256_update(
-		(*C.crypto_auth_hmacsha512256_state)(unsafe.Pointer(&state[0])),
-		(*C.uchar)(support.BytePointer(in)),
-		(C.ulonglong)(len(in)))
-}
-
-// Final returns the authentication tag for a state.
-func Final(state []byte) []byte {
-	out := make([]byte, Bytes())
-
-	C.crypto_auth_hmacsha512256_final(
-		(*C.crypto_auth_hmacsha512256_state)(unsafe.Pointer(&state[0])),
-		(*C.uchar)(&out[0]))
-
-	return out
-}
-
-// KeyGen generates a secret key
-func KeyGen() []byte {
-	k := make([]byte, KeyBytes())
+// GenerateKey generates a secret key.
+func GenerateKey() *Key {
+	k := new(Key)
 	C.crypto_auth_hmacsha512256_keygen((*C.uchar)(&k[0]))
 	return k
 }
-

@@ -1,21 +1,21 @@
 package auth
 
 import (
-	"testing"
 	"github.com/google/gofuzz"
+	"testing"
 )
 
 var testCount = 100000
 
-func Test(t *testing.T) {
+func TestAuth(t *testing.T) {
 	// Check primitive
-	if Primitive() != "hmacsha512256" {
-		t.Error("Incorrect primitive")
+	if Primitive != "hmacsha512256" {
+		t.Errorf("Unexpected primitive: %s", Primitive)
 	}
 
 	// Test the key generation
-	if len(KeyGen()) != KeyBytes() {
-		t.Error("Generated key has the wrong length")
+	if *GenerateKey() == (Key{}) {
+		t.Error("Generated key is zero")
 	}
 
 	// Fuzzing
@@ -24,18 +24,24 @@ func Test(t *testing.T) {
 	// Run tests
 	for i := 0; i < testCount; i++ {
 		var m []byte
-		var k [32]byte
+		var k Key
 
 		// Fuzz the test inputs
 		f.Fuzz(&m)
 		f.Fuzz(&k)
 
 		// Create a tag
-		h := Auth(m, k[:])
+		h := New(m, &k)
 
-		// Verify the tag
-		if !Verify(h, m, k[:]) {
+		// CheckMAC the tag for correct info
+		if CheckMAC(m, h, &k) != nil {
 			t.Errorf("Verification failed for: h: %x, m: %x, k: %x", h, m, k)
+		}
+
+		// CheckMAC the tag for incorrect info
+		m = append(m, 0)
+		if CheckMAC(m, h, &k) == nil {
+			t.Errorf("Verification unexpectedly succeeded for: h: %x, m: %x, k: %x", h, m, k)
 		}
 	}
 }
