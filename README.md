@@ -11,13 +11,19 @@ Team (as of now...)
 ----------------
 <ul>
 <li>Stephen Chavez (@redragonx)</li>
-<li>Graham Smith (@neuegram)</l>
+<li>Graham Smith (@neuegram)</li>
 </ul>
 
 How to build
 ------------
 For linux, this should be easy since there's pkg-config support. Please make sure libsodium is installed on your system first.
 
+Pre-setup:
+1. Please install Libsodium here https://download.libsodium.org/doc/installation/index.html
+2. `sudo ldconfig`
+3. `sudo apt-get install pkg-config`
+
+Install libsodium-go:
 1. `go get -d github.com/GoKillers/libsodium-go`
 2. `cd $GOPATH/src/github.com/GoKillers/libsodium-go`
 3. `./build.sh`
