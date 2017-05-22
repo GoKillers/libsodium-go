@@ -1,3 +1,5 @@
+!This code requires an independent audit check!
+
 libsodium-go
 ============
 A binding library made in Go for the popular portable cryptography library [Sodium](https://download.libsodium.org/doc/).
