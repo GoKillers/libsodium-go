@@ -22,9 +22,10 @@ func CryptoKdfBytesMax() int {
 	return int(C.crypto_kdf_bytes_max())
 }
 
-func CryptoKdfKeygen(k []byte) {
-	support.CheckSize(k, CryptoKdfKeybytes(), "keybytes")
+func CryptoKdfKeygen() []byte {
+	k := make([]byte, CryptoKdfKeybytes())
 	C.crypto_kdf_keygen((*C.uchar)(&k[0]))
+	return k
 }
 
 func CryptoKdfDeriveFromKey(l int, i uint64, c string, k []byte) ([]byte, int) {
