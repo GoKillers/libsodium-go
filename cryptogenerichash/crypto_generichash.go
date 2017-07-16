@@ -40,11 +40,11 @@ func CryptoGenericHashStateBytes() int {
 
 // I took care of the typedef confusions. This should work okay.
 func CryptoGenericHash(outlen int, in []byte, key []byte) ([]byte, int) {
-	support.CheckSizeInRange(outlen, CryptoGenericHashBytesMin(), CryptoGenericHashBytesMax(), "out")
+	support.CheckIntInRange(outlen, CryptoGenericHashBytesMin(), CryptoGenericHashBytesMax(), "out")
 
 	// Check size of key only if actually given
 	if len(key) > 0 {
-		support.CheckSizeInRange(len(key), CryptoGenericHashKeyBytesMin(), CryptoGenericHashKeyBytesMax(), "key")
+		support.CheckSizeInRange(key, CryptoGenericHashKeyBytesMin(), CryptoGenericHashKeyBytesMax(), "key")
 	}
 
 	out := make([]byte, outlen)
@@ -61,11 +61,11 @@ func CryptoGenericHash(outlen int, in []byte, key []byte) ([]byte, int) {
 
 // I took care of the typedef confusions. This should work okay.
 func CryptoGenericHashInit(key []byte, outlen int) (*C.struct_crypto_generichash_blake2b_state, int) {
-	support.CheckSizeInRange(outlen, CryptoGenericHashBytesMin(), CryptoGenericHashBytesMax(), "out")
+	support.CheckIntInRange(outlen, CryptoGenericHashBytesMin(), CryptoGenericHashBytesMax(), "out")
 
 	// Check size of key only if actually given
 	if len(key) > 0 {
-		support.CheckSizeInRange(len(key), CryptoGenericHashKeyBytesMin(), CryptoGenericHashKeyBytesMax(), "key")
+		support.CheckSizeInRange(key, CryptoGenericHashKeyBytesMin(), CryptoGenericHashKeyBytesMax(), "key")
 	}
 
 	state := new(C.struct_crypto_generichash_blake2b_state)
@@ -89,7 +89,7 @@ func CryptoGenericHashUpdate(state *C.struct_crypto_generichash_blake2b_state, i
 }
 
 func CryptoGenericHashFinal(state *C.struct_crypto_generichash_blake2b_state, outlen int) (*C.struct_crypto_generichash_blake2b_state, []byte, int) {
-	support.CheckSizeInRange(outlen, CryptoGenericHashBytesMin(), CryptoGenericHashBytesMax(), "out")
+	support.CheckIntInRange(outlen, CryptoGenericHashBytesMin(), CryptoGenericHashBytesMax(), "out")
 	out := make([]byte, outlen)
 	exit := int(C.crypto_generichash_final(
 		state,

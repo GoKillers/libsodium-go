@@ -19,6 +19,13 @@ func CheckSizeMin(buf []byte, min int, descrip string) {
 	}
 }
 
+// CheckIntInRange checks if the size of an integer is between a lower and upper boundaries.
+func CheckIntInRange(n int, min int, max int, descrip string) {
+	if n < min || n > max {
+		panic(fmt.Sprintf("Incorrect %s size, expected (%d - %d), got (%d).", descrip, min, max, n))
+	}
+}
+
 // CheckSizeInRange checks if the length of a byte slice is between a lower and upper boundaries.
 func CheckSizeInRange(buf []byte, min int, max int, descrip string) {
 	if len(buf) < min || len(buf) > max {
