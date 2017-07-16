@@ -16,6 +16,7 @@ const (
 	NonceBytes     = C.crypto_box_curve25519xchacha20poly1305_NONCEBYTES     // Size of a nonce.
 	MACBytes       = C.crypto_box_curve25519xchacha20poly1305_MACBYTES       // Size of an authentication tag.
 	SharedKeyBytes = C.crypto_box_curve25519xchacha20poly1305_BEFORENMBYTES  // Size of a shared secret key.
+	SealBytes      = C.crypto_box_curve25519xchacha20poly1305_SEALBYTES      // Overhead of a sealed encryption
 )
 
 // PublicKey represents a public key.
@@ -239,6 +240,45 @@ func OpenDetachedAfterPrecomputation(c, mac, n []byte, k *SharedKey) (m []byte, 
 		(C.ulonglong)(len(c)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&k[0]))
+
+	if exit != 0 {
+		err = &support.VerificationError{}
+	}
+
+	return
+}
+
+// SealAnonymous encrypts a message `m` for a public key `pk` without information about the sender.
+// Returns a ciphertext and a boolean indicating successful encryption.
+func SealAnonymous(m []byte, pk *PublicKey) (c []byte) {
+	support.NilPanic(pk == nil, "public key")
+
+	c = make([]byte, len(m)+SealBytes)
+
+	C.crypto_box_curve25519xchacha20poly1305_seal(
+		(*C.uchar)(&c[0]),
+		(*C.uchar)(support.BytePointer(m)),
+		C.ulonglong(len(m)),
+		(*C.uchar)(&pk[0]))
+
+	return
+}
+
+// OpenAnonymous decrypts a message `m` with public key `pk` and secret key `sk`.
+// Returns the decrypted message and a boolean indicating successful decryption and verification.
+func OpenAnonymous(c []byte, pk *PublicKey, sk *SecretKey) (m []byte, err error) {
+	support.CheckSizeMin(c, SealBytes, "ciphertext")
+	support.NilPanic(pk == nil, "public key")
+	support.NilPanic(sk == nil, "secret key")
+
+	m = make([]byte, len(c)-SealBytes)
+
+	exit := C.crypto_box_curve25519xchacha20poly1305_seal_open(
+		(*C.uchar)(support.BytePointer(m)),
+		(*C.uchar)(&c[0]),
+		(C.ulonglong)(len(c)),
+		(*C.uchar)(&pk[0]),
+		(*C.uchar)(&sk[0]))
 
 	if exit != 0 {
 		err = &support.VerificationError{}

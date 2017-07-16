@@ -106,6 +106,19 @@ func TestCryptoBox(t *testing.T) {
 			t.Errorf("Decryption with shared key failed for %+v", test)
 			t.FailNow()
 		}
+
+		// Anonymous test
+		ec = SealAnonymous(test.Message, pk)
+
+		if fail {
+			copy(ec[len(ec)-MACBytes:], mac)
+		}
+
+		m, err = OpenAnonymous(ec, pk, sk)
+		if checkResult(fail, err, m, test.Message) {
+			t.Errorf("Anonymous decryption failed (%v) for c: %v, m: %v", err, ec, test.Message)
+			t.FailNow()
+		}
 	}
 	t.Logf("Completed %v tests", testCount)
 }
