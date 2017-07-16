@@ -1,1 +1,3 @@
+setlocal
+set CC=clang
 go build ./...
