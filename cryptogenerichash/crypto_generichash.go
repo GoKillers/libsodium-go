@@ -42,20 +42,18 @@ func CryptoGenericHashStateBytes() int {
 func CryptoGenericHash(outlen int, in []byte, key []byte) ([]byte, int) {
 	support.CheckSizeInRange(outlen, CryptoGenericHashBytesMin(), CryptoGenericHashBytesMax(), "out")
 
-	// Handle hashes with a key
-	k := (*byte)(nil)
+	// Check size of key only if actually given
 	if len(key) > 0 {
 		support.CheckSizeInRange(len(key), CryptoGenericHashKeyBytesMin(), CryptoGenericHashKeyBytesMax(), "key")
-		k = &key[0]
 	}
 
 	out := make([]byte, outlen)
 	exit := int(C.crypto_generichash(
 		(*C.uchar)(&out[0]),
 		(C.size_t)(outlen),
-		(*C.uchar)(&in[0]),
+		(*C.uchar)(support.BytePointer(in)),
 		(C.ulonglong)(len(in)),
-		(*C.uchar)(k),
+		(*C.uchar)(support.BytePointer(key)),
 		(C.size_t)(len(key))))
 
 	return out, exit
@@ -64,10 +62,16 @@ func CryptoGenericHash(outlen int, in []byte, key []byte) ([]byte, int) {
 // I took care of the typedef confusions. This should work okay.
 func CryptoGenericHashInit(key []byte, outlen int) (*C.struct_crypto_generichash_blake2b_state, int) {
 	support.CheckSizeInRange(outlen, CryptoGenericHashBytesMin(), CryptoGenericHashBytesMax(), "out")
+
+	// Check size of key only if actually given
+	if len(key) > 0 {
+		support.CheckSizeInRange(len(key), CryptoGenericHashKeyBytesMin(), CryptoGenericHashKeyBytesMax(), "key")
+	}
+
 	state := new(C.struct_crypto_generichash_blake2b_state)
 	exit := int(C.crypto_generichash_init(
 		(*C.struct_crypto_generichash_blake2b_state)(state),
-		(*C.uchar)(&key[0]),
+		(*C.uchar)(support.BytePointer(key)),
 		(C.size_t)(len(key)),
 		(C.size_t)(outlen)))
 
@@ -77,8 +81,8 @@ func CryptoGenericHashInit(key []byte, outlen int) (*C.struct_crypto_generichash
 // I took care of the typedef confusions. This should work okay.
 func CryptoGenericHashUpdate(state *C.struct_crypto_generichash_blake2b_state, in []byte) (*C.struct_crypto_generichash_blake2b_state, int) {
 	exit := int(C.crypto_generichash_update(
-		(state),
-		(*C.uchar)(&in[0]),
+		state,
+		(*C.uchar)(support.BytePointer(in)),
 		(C.ulonglong)(len(in))))
 
 	return state, exit
