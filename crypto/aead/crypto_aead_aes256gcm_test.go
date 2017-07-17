@@ -13,7 +13,7 @@ type TestData struct {
 	Message []byte
 	Ad      []byte
 	Dst     []byte
-	Key     aes256gcm.Key
+	Key     [aes256gcm.KeyBytes]byte
 	Nonce   [aes256gcm.NonceBytes]byte
 }
 

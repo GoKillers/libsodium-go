@@ -11,13 +11,13 @@ var testCount = 100000
 type TestData struct {
 	Message []byte
 	Ad      []byte
-	Key     Key
+	Key     [KeyBytes]byte
 	Nonce   [NonceBytes]byte
 }
 
 func Test(t *testing.T) {
 	// Test the key generation
-	if *GenerateKey() == (Key{}) {
+	if *GenerateKey() == ([KeyBytes]byte{}) {
 		t.Error("Generated key is zero")
 	}
 
@@ -39,24 +39,24 @@ func Test(t *testing.T) {
 		f.Fuzz(&test)
 
 		// Detached encryption test
-		c, mac = EncryptDetached(test.Message, test.Ad, test.Nonce[:], test.Key[:])
+		c, mac = EncryptDetached(test.Message, test.Ad, &test.Nonce, &test.Key)
 
 		// Encryption test
-		ec = Encrypt(test.Message, test.Ad, test.Nonce[:], test.Key[:])
+		ec = Encrypt(test.Message, test.Ad, &test.Nonce, &test.Key)
 		if !bytes.Equal(ec, append(c, mac...)) {
 			t.Errorf("Encryption failed for %+v", test)
 			t.FailNow()
 		}
 
 		// Detached decryption test
-		m, err = DecryptDetached(c, mac, test.Ad, test.Nonce[:], test.Key[:])
+		m, err = DecryptDetached(c, mac, test.Ad, &test.Nonce, &test.Key)
 		if err != nil || !bytes.Equal(m, test.Message) {
 			t.Errorf("Detached decryption failed for %+v", test)
 			t.FailNow()
 		}
 
 		// Decryption test
-		m, err = Decrypt(ec, test.Ad, test.Nonce[:], test.Key[:])
+		m, err = Decrypt(ec, test.Ad, &test.Nonce, &test.Key)
 		if err != nil || !bytes.Equal(m, test.Message) {
 			t.Errorf("Decryption failed for %+v", test)
 			t.FailNow()
@@ -64,7 +64,7 @@ func Test(t *testing.T) {
 
 		// Failed detached decryption test
 		mac = make([]byte, ABytes)
-		m, err = DecryptDetached(c, mac, test.Ad, test.Nonce[:], test.Key[:])
+		m, err = DecryptDetached(c, mac, test.Ad, &test.Nonce, &test.Key)
 		if err == nil {
 			t.Errorf("Detached decryption unexpectedly succeeded for %+v", test)
 			t.FailNow()
@@ -72,7 +72,7 @@ func Test(t *testing.T) {
 
 		// Failed decryption test
 		copy(ec[len(m):], mac)
-		m, err = Decrypt(ec, test.Ad, test.Nonce[:], test.Key[:])
+		m, err = Decrypt(ec, test.Ad, &test.Nonce, &test.Key)
 		if err == nil {
 			t.Errorf("Decryption unexpectedly succeeded for %+v", test)
 			t.FailNow()

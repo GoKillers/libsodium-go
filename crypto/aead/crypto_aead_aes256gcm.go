@@ -13,7 +13,7 @@ import (
 type AES256GCM C.crypto_aead_aes256gcm_state
 
 // NewAES256GCM returns a AES256GCM cipher for an AES256 key.
-func NewAES256GCM(k *aes256gcm.Key) AEAD {
+func NewAES256GCM(k *[aes256gcm.KeyBytes]byte) AEAD {
 	support.NilPanic(k == nil, "key")
 
 	ctx := new(AES256GCM)

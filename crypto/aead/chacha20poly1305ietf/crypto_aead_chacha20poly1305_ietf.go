@@ -20,21 +20,18 @@ const (
 	ABytes     int = C.crypto_aead_chacha20poly1305_ietf_ABYTES    // Size of an authentication tag in bytes
 )
 
-// Key represents a secret key
-type Key [KeyBytes]byte
-
 // GenerateKey generates a secret key
-func GenerateKey() *Key {
-	k := new(Key)
+func GenerateKey() *[KeyBytes]byte {
+	k := new([KeyBytes]byte)
 	C.crypto_aead_chacha20poly1305_ietf_keygen((*C.uchar)(&k[0]))
 	return k
 }
 
 // Encrypt a message `m` with additional data `ad` using a nonce `npub` and a secret key `k`.
 // A ciphertext (including authentication tag) and encryption status are returned.
-func Encrypt(m, ad, nonce, k []byte) (c []byte) {
-	support.CheckSize(k, KeyBytes, "secret key")
-	support.CheckSize(nonce, NonceBytes, "public nonce")
+func Encrypt(m, ad []byte, nonce *[NonceBytes]byte, k *[KeyBytes]byte) (c []byte) {
+	support.NilPanic(k == nil, "secret key")
+	support.NilPanic(nonce == nil, "nonce")
 
 	c = make([]byte, len(m)+ABytes)
 
@@ -54,9 +51,9 @@ func Encrypt(m, ad, nonce, k []byte) (c []byte) {
 
 // Decrypt and verify a ciphertext `c` using additional data `ad`, nonce `npub` and secret key `k`.
 // Returns the decrypted message and verification status.
-func Decrypt(c, ad, nonce, k []byte) (m []byte, err error) {
-	support.CheckSize(k, KeyBytes, "secret key")
-	support.CheckSize(nonce, NonceBytes, "public nonce")
+func Decrypt(c, ad []byte, nonce *[NonceBytes]byte, k *[KeyBytes]byte) (m []byte, err error) {
+	support.NilPanic(k == nil, "secret key")
+	support.NilPanic(nonce == nil, "nonce")
 	support.CheckSizeMin(c, ABytes, "ciphertext")
 
 	m = make([]byte, len(c)-ABytes)
@@ -82,9 +79,9 @@ func Decrypt(c, ad, nonce, k []byte) (m []byte, err error) {
 // EncryptDetached encrypts a message `m` with additional data `ad` using
 // a nonce `npub` and a secret key `k`.
 // A ciphertext, authentication tag and encryption status are returned.
-func EncryptDetached(m, ad, nonce, k []byte) (c, mac []byte) {
-	support.CheckSize(k, KeyBytes, "secret key")
-	support.CheckSize(nonce, NonceBytes, "public nonce")
+func EncryptDetached(m, ad []byte, nonce *[NonceBytes]byte, k *[KeyBytes]byte) (c, mac []byte) {
+	support.NilPanic(k == nil, "secret key")
+	support.NilPanic(nonce == nil, "nonce")
 
 	c = make([]byte, len(m))
 	mac = make([]byte, ABytes)
@@ -107,9 +104,9 @@ func EncryptDetached(m, ad, nonce, k []byte) (c, mac []byte) {
 // DecryptDetached decrypts and verifies a ciphertext `c` with authentication tag `mac`
 // using additional data `ad`, nonce `npub` and secret key `k`.
 // Returns the decrypted message and verification status.
-func DecryptDetached(c, mac, ad, nonce, k []byte) (m []byte, err error) {
-	support.CheckSize(k, KeyBytes, "secret key")
-	support.CheckSize(nonce, NonceBytes, "public nonce")
+func DecryptDetached(c, mac, ad []byte, nonce *[NonceBytes]byte, k *[KeyBytes]byte) (m []byte, err error) {
+	support.NilPanic(k == nil, "secret key")
+	support.NilPanic(nonce == nil, "nonce")
 	support.CheckSize(mac, ABytes, "mac")
 
 	m = make([]byte, len(c))
