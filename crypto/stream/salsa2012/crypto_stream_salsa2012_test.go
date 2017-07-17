@@ -10,7 +10,7 @@ var TestCount = 100000
 
 func TestSalsa2012(t *testing.T) {
 	// Test the key generation
-	if *GenerateKey() == (Key{}) {
+	if *GenerateKey() == ([KeyBytes]byte{}) {
 		t.Error("Generated key is zero")
 	}
 
@@ -20,8 +20,8 @@ func TestSalsa2012(t *testing.T) {
 
 	// Run tests
 	for i := 0; i < TestCount; i++ {
-		var c, m, r, d []byte
-		n := new(Nonce)
+		var c, m, m2, r, d []byte
+		n := new([NonceBytes]byte)
 
 		// Generate random data
 		fm.Fuzz(&m)
@@ -47,8 +47,10 @@ func TestSalsa2012(t *testing.T) {
 		}
 
 		// Check if in-place encryption works
-		XORKeyStream(m, m, n, k)
-		if !bytes.Equal(c, m) {
+		m2 = make([]byte, len(m))
+		copy(m2, m)
+		XORKeyStream(m2, m2, n, k)
+		if !bytes.Equal(c, m2) {
 			t.Errorf("In place encryption failed for m: %x, n: %x, k: %x", m, n, k)
 			t.FailNow()
 		}

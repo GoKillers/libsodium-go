@@ -10,7 +10,7 @@ var TestCount = 100000
 
 func TestChaCha20IETF(t *testing.T) {
 	// Test the key generation
-	if *GenerateKey() == (Key{}) {
+	if *GenerateKey() == ([KeyBytes]byte{}) {
 		t.Error("Generated key is zero")
 	}
 
@@ -21,7 +21,7 @@ func TestChaCha20IETF(t *testing.T) {
 	// Run tests
 	for i := 0; i < TestCount; i++ {
 		var c, m, m2, r, d []byte
-		n := new(Nonce)
+		n := new([NonceBytes]byte)
 
 		// Generate random data
 		fm.Fuzz(&m)

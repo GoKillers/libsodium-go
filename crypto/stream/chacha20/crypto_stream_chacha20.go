@@ -18,14 +18,8 @@ const (
 	NonceBytes int = C.crypto_stream_chacha20_NONCEBYTES
 )
 
-// Nonce represents a cryptographic nonce
-type Nonce [NonceBytes]byte
-
-// Key represents a secret key
-type Key [KeyBytes]byte
-
 // KeyStream fills an output buffer `c` with pseudo random bytes using a nonce `n` and a secret key `k`.
-func KeyStream(c []byte, n *Nonce, k *Key) {
+func KeyStream(c []byte, n *[NonceBytes]byte, k *[KeyBytes]byte) {
 	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "key")
 
@@ -42,10 +36,10 @@ func KeyStream(c []byte, n *Nonce, k *Key) {
 
 // XORKeyStream encrypts a message `m` using a nonce `n` and a secret key `k` and puts the resulting ciphertext into `c`.
 // If `m` and `c` are the same slice, in-place encryption is performed.
-func XORKeyStream(c, m []byte, n *Nonce, k *Key) {
+func XORKeyStream(c, m []byte, n *[NonceBytes]byte, k *[KeyBytes]byte) {
 	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "key")
-	support.CheckSizeSmaller(c, m, "output", "input")
+	support.CheckSizeGreaterOrEqual(c, m, "output", "input")
 
 	if len(c) == 0 {
 		return
@@ -62,10 +56,10 @@ func XORKeyStream(c, m []byte, n *Nonce, k *Key) {
 // XORKeyStreamIC encrypts a message `m` using a nonce `n` and a secret key `k`,
 // but with a block counter starting at `ic`.
 // If `m` and `c` are the same slice, in-place encryption is performed.
-func XORKeyStreamIC(c, m []byte, n *Nonce, k *Key, ic uint64) {
+func XORKeyStreamIC(c, m []byte, n *[NonceBytes]byte, k *[KeyBytes]byte, ic uint64) {
 	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "key")
-	support.CheckSizeSmaller(c, m, "output", "input")
+	support.CheckSizeGreaterOrEqual(c, m, "output", "input")
 
 	if len(c) == 0 {
 		return
@@ -81,8 +75,8 @@ func XORKeyStreamIC(c, m []byte, n *Nonce, k *Key, ic uint64) {
 }
 
 // GenerateKey generates a secret key
-func GenerateKey() *Key {
-	k := new(Key)
+func GenerateKey() *[KeyBytes]byte {
+	k := new([KeyBytes]byte)
 
 	C.crypto_stream_chacha20_keygen((*C.uchar)(&k[0]))
 
