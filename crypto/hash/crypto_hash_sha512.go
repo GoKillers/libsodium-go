@@ -14,8 +14,8 @@ type sha512 C.crypto_hash_sha512_state
 // SHA512Bytes represents the size of the hash in bytes
 const SHA512Bytes int = C.crypto_hash_sha512_BYTES
 
-// SHA512 returns the SHA512 hash of input data `in`
-func SHA512(in []byte) []byte {
+// SumSHA512 returns the SHA512 hash of input data `in`
+func SumSHA512(in []byte) []byte {
 	out := make([]byte, SHA512Bytes)
 
 	C.crypto_hash_sha512(

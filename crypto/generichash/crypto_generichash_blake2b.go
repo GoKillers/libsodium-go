@@ -9,16 +9,16 @@ import (
 	"hash"
 )
 
-// Sizes of arguments
+// The following constants reflect the properties of the Blake2b hash:
 const (
-	Blake2bBytesMin      int = C.crypto_generichash_blake2b_BYTES_MIN
-	Blake2bBytesMax      int = C.crypto_generichash_blake2b_BYTES_MAX
-	Blake2bBytes         int = C.crypto_generichash_blake2b_BYTES
-	Blake2bKeyBytesMin   int = C.crypto_generichash_blake2b_KEYBYTES_MIN
-	Blake2bKeyBytesMax   int = C.crypto_generichash_blake2b_KEYBYTES_MAX
-	Blake2bKeyBytes      int = C.crypto_generichash_blake2b_KEYBYTES
-	Blake2bSaltBytes     int = C.crypto_generichash_blake2b_SALTBYTES
-	Blake2bPersonalBytes int = C.crypto_generichash_blake2b_PERSONALBYTES
+	Blake2bBytesMin      int = C.crypto_generichash_blake2b_BYTES_MIN     // Minimum hash size in bytes
+	Blake2bBytesMax      int = C.crypto_generichash_blake2b_BYTES_MAX     // Maximum hash size in bytes
+	Blake2bBytes         int = C.crypto_generichash_blake2b_BYTES         // Default hash size in bytes
+	Blake2bKeyBytesMin   int = C.crypto_generichash_blake2b_KEYBYTES_MIN  // Minimum key size in bytes
+	Blake2bKeyBytesMax   int = C.crypto_generichash_blake2b_KEYBYTES_MAX  // Maximum key size in bytes
+	Blake2bKeyBytes      int = C.crypto_generichash_blake2b_KEYBYTES      // Default key size in bytes
+	Blake2bSaltBytes     int = C.crypto_generichash_blake2b_SALTBYTES     // Size of the salt in bytes
+	Blake2bPersonalBytes int = C.crypto_generichash_blake2b_PERSONALBYTES // Size of the personal in bytes
 )
 
 type blake2b struct {
@@ -26,12 +26,12 @@ type blake2b struct {
 	s *C.crypto_generichash_blake2b_state
 }
 
-// Blake2b returns the Blake2b hash of input data `in` in output buffer `out`.
+// SumBlake2b returns the Blake2b hash of input data `in` in output buffer `out`.
 // A key `key` can be given to create a hash unique to that key.
 // The length of the hash is determined by the length of the output buffer,
 // which has to be between BytesMin and BytesMax (inclusive).
 // The size of `key` can either be 0 or between KeyBytesMin and KeyBytesMax (inclusive).
-func Blake2b(out, in, key []byte) {
+func SumBlake2b(out, in, key []byte) {
 	support.CheckSizeInRange(out, Blake2bBytesMin, Blake2bBytesMax, "out")
 
 	if len(key) > 0 {
@@ -44,12 +44,12 @@ func Blake2b(out, in, key []byte) {
 		(*C.uchar)(support.BytePointer(key)), C.size_t(len(key)))
 }
 
-// Blake2bSaltPersonal returns the Blake2b salted and personalised hash of input data `in` in output buffer `out`.
+// SumBlake2bSaltPersonal returns the Blake2b salted and personalised hash of input data `in` in output buffer `out`.
 // A key `key` can be given to create a hash unique to that key.
 // The length of the hash is determined by the length of the output buffer,
 // which has to be between BytesMin and BytesMax (inclusive).
 // The size of `key` can either be 0 or between KeyBytesMin and KeyBytesMax (inclusive).
-func Blake2bSaltPersonal(out, in, key, salt, personal []byte) {
+func SumBlake2bSaltPersonal(out, in, key, salt, personal []byte) {
 	support.CheckSizeInRange(out, Blake2bBytesMin, Blake2bBytesMax, "out")
 	support.CheckSize(salt, Blake2bSaltBytes, "salt")
 	support.CheckSize(personal, Blake2bPersonalBytes, "personal")
@@ -66,7 +66,7 @@ func Blake2bSaltPersonal(out, in, key, salt, personal []byte) {
 		(*C.uchar)(&personal[0]))
 }
 
-// NewBlake2b returns a new hash.Hash for computing the Blake2b hash.
+// NewBlake2b returns a new hash.Sum for computing the Blake2b hash.
 // A key `key` can be given to create a hash unique to that key.
 // `size` determines the length of the hash and has to be between BytesMin and BytesMax.
 // The size `key` can either be 0 or between KeyBytesMin and KeyBytesMax (inclusive).
@@ -90,7 +90,7 @@ func NewBlake2b(size int, key []byte) hash.Hash {
 	return s
 }
 
-// NewBlake2bSaltPersonal returns a new hash.Hash for computing the salted and personalised Blake2b hash.
+// NewBlake2bSaltPersonal returns a new hash.Sum for computing the salted and personalised Blake2b hash.
 // A key `key` can be given to create a hash unique to that key.
 // `size` determines the length of the hash and has to be between BytesMin and BytesMax.
 // The size `key` can either be 0 or between KeyBytesMin and KeyBytesMax (inclusive).
@@ -154,8 +154,8 @@ func (s *blake2b) BlockSize() int {
 	return 1
 }
 
-// GenerateBlake2bKey generates a key for use with Blake2b
-func GenerateBlake2bKey() []byte {
+// GenerateKeyBlake2b generates a key for use with Blake2b
+func GenerateKeyBlake2b() []byte {
 	k := make([]byte, Blake2bKeyBytes)
 	C.crypto_generichash_blake2b_keygen((*C.uchar)(&k[0]))
 	return k

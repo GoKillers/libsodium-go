@@ -13,7 +13,7 @@ func TestBlake2b(t *testing.T) {
 	}
 
 	// Test the key generation
-	if bytes.Equal(GenerateBlake2bKey(), make([]byte, Blake2bKeyBytes)) {
+	if bytes.Equal(GenerateKeyBlake2b(), make([]byte, Blake2bKeyBytes)) {
 		t.Error("Generated key is zero")
 	}
 
@@ -21,11 +21,11 @@ func TestBlake2b(t *testing.T) {
 	f := fuzz.New().NilChance(0.01).NumElements(1, 1024)
 
 	// Check size
-	s := NewHash(BytesMin, nil)
+	s := New(BytesMin, nil)
 
 	// Check block size
 	if s.BlockSize() != 1 {
-		t.Error("Hash block size incorrect")
+		t.Error("Sum block size incorrect")
 	}
 
 	// Run tests
@@ -51,7 +51,7 @@ func TestBlake2b(t *testing.T) {
 
 		// Create a hash
 		h := make([]byte, l)
-		Blake2b(h, m, k)
+		SumBlake2b(h, m, k)
 
 		// Create the same hash with the streaming functions
 		s = NewBlake2b(l, k)
@@ -59,18 +59,18 @@ func TestBlake2b(t *testing.T) {
 
 		// Check size
 		if s.Size() != l {
-			t.Error("Hash size mismatch")
+			t.Error("Sum size mismatch")
 		}
 
 		// Compare hashes
 		if !bytes.Equal(s.Sum(b), append(b, h...)) {
 			t.Log(len(h))
-			t.Errorf("Hash verification failed for: m: %x", m)
+			t.Errorf("Sum verification failed for: m: %x", m)
 			t.FailNow()
 		}
 
 		// Create a salted/personalised hash
-		Blake2bSaltPersonal(h, m, k, st[:], p[:])
+		SumBlake2bSaltPersonal(h, m, k, st[:], p[:])
 
 		// Create the same hash with the streaming functions
 		s = NewBlake2bSaltPersonal(l, k, st[:], p[:])
@@ -78,13 +78,13 @@ func TestBlake2b(t *testing.T) {
 
 		// Check size
 		if s.Size() != l {
-			t.Error("Hash size mismatch")
+			t.Error("Sum size mismatch")
 		}
 
 		// Compare hashes
 		if !bytes.Equal(s.Sum(b), append(b, h...)) {
 			t.Log(len(h))
-			t.Errorf("Hash verification failed for: m: %x", m)
+			t.Errorf("Sum verification failed for: m: %x", m)
 			t.FailNow()
 		}
 	}

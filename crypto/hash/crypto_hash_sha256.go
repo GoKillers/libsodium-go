@@ -14,8 +14,8 @@ type sha256 C.crypto_hash_sha256_state
 // SHA256Bytes represents the size of the hash in bytes
 const SHA256Bytes int = C.crypto_hash_sha256_BYTES
 
-// SHA256 returns the SHA256 hash of input data `in`
-func SHA256(in []byte) []byte {
+// SumSHA256 returns the SHA256 hash of input data `in`
+func SumSHA256(in []byte) []byte {
 	out := make([]byte, SHA256Bytes)
 
 	C.crypto_hash_sha256(

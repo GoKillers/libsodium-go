@@ -31,7 +31,7 @@ func TestSHA512(t *testing.T) {
 		f.Fuzz(&b)
 
 		// Create a hash
-		h := SHA512(m)
+		h := SumSHA512(m)
 
 		// Create the same hash with the streaming functions
 		s.Reset()

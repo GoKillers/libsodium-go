@@ -31,7 +31,7 @@ func TestSHA256(t *testing.T) {
 		f.Fuzz(&b)
 
 		// Create a hash
-		h := SHA256(m)
+		h := SumSHA256(m)
 
 		// Create the same hash with the streaming functions
 		s.Reset()

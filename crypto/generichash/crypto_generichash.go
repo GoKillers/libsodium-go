@@ -1,3 +1,4 @@
+// Package generichash contains the libsodium bindings for generic hashing.
 package generichash
 
 // #cgo pkg-config: libsodium
@@ -9,15 +10,15 @@ import (
 	"hash"
 )
 
-// Sizes of arguments
+// The following constants reflect the properties of the generic hash:
 const (
-	BytesMin    int    = C.crypto_generichash_BYTES_MIN
-	BytesMax    int    = C.crypto_generichash_BYTES_MAX
-	Bytes       int    = C.crypto_generichash_BYTES
-	KeyBytesMin int    = C.crypto_generichash_KEYBYTES_MIN
-	KeyBytesMax int    = C.crypto_generichash_KEYBYTES_MAX
-	KeyBytes    int    = C.crypto_generichash_KEYBYTES
-	Primitive   string = C.crypto_generichash_PRIMITIVE
+	BytesMin    int    = C.crypto_generichash_BYTES_MIN    // Minimum hash size in bytes
+	BytesMax    int    = C.crypto_generichash_BYTES_MAX    // Maximum hash size in bytes
+	Bytes       int    = C.crypto_generichash_BYTES        // Default hash size in bytes
+	KeyBytesMin int    = C.crypto_generichash_KEYBYTES_MIN // Minimum key size in bytes
+	KeyBytesMax int    = C.crypto_generichash_KEYBYTES_MAX // Maximum key size in bytes
+	KeyBytes    int    = C.crypto_generichash_KEYBYTES     // Default key size in bytes
+	Primitive   string = C.crypto_generichash_PRIMITIVE    // Name of the algorithm used for generic hashing
 )
 
 type state struct {
@@ -25,12 +26,12 @@ type state struct {
 	s *C.crypto_generichash_state
 }
 
-// Hash returns the cryptographic hash of input data `in` in output buffer `out`.
+// Sum returns the cryptographic hash of input data `in` in output buffer `out`.
 // A key `key` can be given to create a hash unique to that key.
 // The length of the hash is determined by the length of the output buffer,
 // which has to be between BytesMin and BytesMax (inclusive).
 // The size of `key` can either be 0 or between KeyBytesMin and KeyBytesMax (inclusive).
-func Hash(out, in, key []byte) {
+func Sum(out, in, key []byte) {
 	support.CheckSizeInRange(out, BytesMin, BytesMax, "out")
 
 	if len(key) > 0 {
@@ -43,11 +44,11 @@ func Hash(out, in, key []byte) {
 		(*C.uchar)(support.BytePointer(key)), C.size_t(len(key)))
 }
 
-// NewHash returns a new hash.Hash for computing the generic hash.
+// New returns a new hash.Sum for computing the generic hash.
 // A key `key` can be given to create a hash unique to that key.
 // `size` determines the length of the hash and has to be between BytesMin and BytesMax.
 // The size `key` can either be 0 or between KeyBytesMin and KeyBytesMax (inclusive).
-func NewHash(size int, key []byte) hash.Hash {
+func New(size int, key []byte) hash.Hash {
 	support.CheckIntInRange(size, BytesMin, BytesMax, "hash size")
 
 	if len(key) > 0 {

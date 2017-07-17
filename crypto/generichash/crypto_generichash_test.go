@@ -27,7 +27,7 @@ func Test(t *testing.T) {
 
 	// Check block size
 	if s.BlockSize() != 1 {
-		t.Error("Hash block size incorrect")
+		t.Error("Sum block size incorrect")
 	}
 
 	// Run tests
@@ -49,21 +49,21 @@ func Test(t *testing.T) {
 
 		// Create a hash
 		h := make([]byte, l)
-		Hash(h, m, k)
+		Sum(h, m, k)
 
 		// Create the same hash with the streaming functions
-		s = NewHash(l, k)
+		s = New(l, k)
 		s.Write(m)
 
 		// Check size
 		if s.Size() != l {
-			t.Error("Hash size mismatch")
+			t.Error("Sum size mismatch")
 		}
 
 		// Compare hashes
 		if !bytes.Equal(s.Sum(b), append(b, h...)) {
 			t.Log(len(h))
-			t.Errorf("Hash verification failed for: m: %x", m)
+			t.Errorf("Sum verification failed for: m: %x", m)
 			t.FailNow()
 		}
 	}

@@ -26,13 +26,13 @@ func Test(t *testing.T) {
 		f.Fuzz(&sk)
 
 		// Create a hash
-		h := Hash(m)
+		h := Sum(m)
 
 		// Create the same hash with SHA512
-		sh := SHA512(m)
+		sh := SumSHA512(m)
 
 		if !bytes.Equal(sh, h) {
-			t.Errorf("Hash failed for: m: %x", m)
+			t.Errorf("Sum failed for: m: %x", m)
 			t.FailNow()
 		}
 	}
