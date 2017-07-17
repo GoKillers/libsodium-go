@@ -8,20 +8,15 @@ import (
 )
 
 func TestHMACSHA512256(t *testing.T) {
-	// Test the key generation
-	if *hmacsha512256.GenerateKey() == (hmacsha512256.Key{}) {
-		t.Error("Generated key is zero")
-	}
-
 	// Check properties of HMAC
 	h := NewHMACSHA512256(nil)
 
 	if h.Size() != hmacsha512256.Bytes {
-		t.Errorf("Incorrect size for hash: %#v", h.Size())
+		t.Errorf("Incorrect size for hash: %#v", h)
 	}
 
-	if h.BlockSize() != 128 {
-		t.Errorf("Incorrect size for hash: %#v", h.BlockSize())
+	if h.BlockSize() != 2*hmacsha512256.Bytes {
+		t.Errorf("Incorrect size for hash: %#v", h)
 	}
 
 	// Fuzzing
@@ -30,7 +25,7 @@ func TestHMACSHA512256(t *testing.T) {
 	// Run tests
 	for i := 0; i < testCount; i++ {
 		var m, sk []byte
-		var k hmacsha512256.Key
+		var k [hmacsha512256.KeyBytes]byte
 
 		// Fuzz the test inputs
 		f.Fuzz(&m)

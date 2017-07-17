@@ -7,13 +7,14 @@ import "C"
 import (
 	"github.com/GoKillers/libsodium-go/crypto/auth/hmacsha512256"
 	"github.com/GoKillers/libsodium-go/support"
+	"hash"
 )
 
-// HMACSHA512256 represents the cryptographic State for HMAC-SHA256.
-type HMACSHA512256 C.crypto_auth_hmacsha512256_state
+// hmacsha512256state represents the cryptographic State for HMAC-SHA512256.
+type hmacsha512256state C.crypto_auth_hmacsha512256_state
 
 // Write adds data to the hash state.
-func (s *HMACSHA512256) Write(in []byte) (n int, err error) {
+func (s *hmacsha512256state) Write(in []byte) (n int, err error) {
 	C.crypto_auth_hmacsha512256_update(
 		(*C.crypto_auth_hmacsha512256_state)(s),
 		(*C.uchar)(support.BytePointer(in)),
@@ -23,7 +24,7 @@ func (s *HMACSHA512256) Write(in []byte) (n int, err error) {
 }
 
 // Sum returns the authentication tag appended to the data in b.
-func (s *HMACSHA512256) Sum(b []byte) []byte {
+func (s *hmacsha512256state) Sum(b []byte) []byte {
 	out := make([]byte, hmacsha512256.Bytes)
 
 	C.crypto_auth_hmacsha512256_final(
@@ -33,19 +34,24 @@ func (s *HMACSHA512256) Sum(b []byte) []byte {
 	return append(b, out...)
 }
 
+// Reset resets the Hash to its initial state.
+func (s *hmacsha512256state) Reset() {
+	panic("HMACSHA512256 cannot be reset")
+}
+
 // Size returns the size of the authentication tag.
-func (s *HMACSHA512256) Size() int {
+func (s *hmacsha512256state) Size() int {
 	return hmacsha512256.Bytes
 }
 
-// BlockSize returns the block size for HMAC-SHA256.
-func (s *HMACSHA512256) BlockSize() int {
-	return 4 * hmacsha512256.Bytes
+// BlockSize returns the block size for HMAC-SHA512256.
+func (s *hmacsha512256state) BlockSize() int {
+	return 2 * hmacsha512256.Bytes
 }
 
-// NewHMACSHA512256 returns a new HMAC-SHA256 hash using a key.
-func NewHMACSHA512256(key []byte) HMAC {
-	s := new(HMACSHA512256)
+// NewHMACSHA512256 returns a new HMAC-SHA512256 hash using a key.
+func NewHMACSHA512256(key []byte) hash.Hash {
+	s := new(hmacsha512256state)
 
 	C.crypto_auth_hmacsha512256_init(
 		(*C.crypto_auth_hmacsha512256_state)(s),

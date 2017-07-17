@@ -1,4 +1,4 @@
-// Package hmacsha512256 contains the libsodium bindings for HMAC-SHA512 truncated to 256 bits.
+// Package hmacsha512256 contains the libsodium bindings for HMAC-SHA512256.
 package hmacsha512256
 
 // #cgo pkg-config: libsodium
@@ -11,28 +11,17 @@ func init() {
 	C.sodium_init()
 }
 
-// Sizes of authentication tag and key, and the name of the used primitive.
+// Sizes of authentication tag and key.
 const (
 	Bytes    int = C.crypto_auth_hmacsha512256_BYTES
 	KeyBytes int = C.crypto_auth_hmacsha512256_KEYBYTES
 )
 
-// Key represents a secret key.
-type Key [KeyBytes]byte
-
-// MAC represents an authentication tag.
-type MAC [Bytes]byte
-
-// StateBytes returns the length of the state
-func StateBytes() int {
-	return int(C.crypto_auth_hmacsha512256_statebytes())
-}
-
 // New returns the authentication tag for input data and a key.
-func New(in []byte, key *Key) *MAC {
+func New(in []byte, key *[KeyBytes]byte) *[Bytes]byte {
 	support.NilPanic(key == nil, "key")
 
-	out := new(MAC)
+	out := new([Bytes]byte)
 
 	C.crypto_auth_hmacsha512256(
 		(*C.uchar)(&out[0]),
@@ -44,7 +33,7 @@ func New(in []byte, key *Key) *MAC {
 }
 
 // CheckMAC if the authentication tag is valid for input data and a key.
-func CheckMAC(in []byte, h *MAC, key *Key) (err error) {
+func CheckMAC(in []byte, h *[Bytes]byte, key *[KeyBytes]byte) (err error) {
 	support.NilPanic(h == nil, "hmac")
 	support.NilPanic(key == nil, "key")
 
@@ -62,8 +51,8 @@ func CheckMAC(in []byte, h *MAC, key *Key) (err error) {
 }
 
 // GenerateKey generates a secret key.
-func GenerateKey() *Key {
-	k := new(Key)
+func GenerateKey() *[KeyBytes]byte {
+	k := new([KeyBytes]byte)
 	C.crypto_auth_hmacsha512256_keygen((*C.uchar)(&k[0]))
 	return k
 }

@@ -8,11 +8,6 @@ import (
 )
 
 func TestHMACSHA256(t *testing.T) {
-	// Test the key generation
-	if *hmacsha256.GenerateKey() == (hmacsha256.Key{}) {
-		t.Error("Generated key is zero")
-	}
-
 	// Check properties of HMAC
 	h := NewHMACSHA256(nil)
 
@@ -20,7 +15,7 @@ func TestHMACSHA256(t *testing.T) {
 		t.Errorf("Incorrect size for hash: %#v", h)
 	}
 
-	if h.BlockSize() != 64 {
+	if h.BlockSize() != 2*hmacsha256.Bytes {
 		t.Errorf("Incorrect size for hash: %#v", h)
 	}
 
@@ -30,7 +25,7 @@ func TestHMACSHA256(t *testing.T) {
 	// Run tests
 	for i := 0; i < testCount; i++ {
 		var m, sk []byte
-		var k hmacsha256.Key
+		var k [hmacsha256.KeyBytes]byte
 
 		// Fuzz the test inputs
 		f.Fuzz(&m)

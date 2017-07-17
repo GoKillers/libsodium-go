@@ -7,13 +7,14 @@ import "C"
 import (
 	"github.com/GoKillers/libsodium-go/crypto/auth/hmacsha256"
 	"github.com/GoKillers/libsodium-go/support"
+	"hash"
 )
 
-// HMACSHA256 represents the cryptographic State for HMAC-SHA256.
-type HMACSHA256 C.crypto_auth_hmacsha256_state
+// hmacsha256state represents the cryptographic State for HMAC-SHA256.
+type hmacsha256state C.crypto_auth_hmacsha256_state
 
 // Write adds data to the hash state.
-func (s *HMACSHA256) Write(in []byte) (n int, err error) {
+func (s *hmacsha256state) Write(in []byte) (n int, err error) {
 	C.crypto_auth_hmacsha256_update(
 		(*C.crypto_auth_hmacsha256_state)(s),
 		(*C.uchar)(support.BytePointer(in)),
@@ -23,7 +24,7 @@ func (s *HMACSHA256) Write(in []byte) (n int, err error) {
 }
 
 // Sum returns the authentication tag appended to the data in b.
-func (s *HMACSHA256) Sum(b []byte) []byte {
+func (s *hmacsha256state) Sum(b []byte) []byte {
 	out := make([]byte, hmacsha256.Bytes)
 
 	C.crypto_auth_hmacsha256_final(
@@ -33,19 +34,24 @@ func (s *HMACSHA256) Sum(b []byte) []byte {
 	return append(b, out...)
 }
 
+// Reset resets the Hash to its initial state.
+func (s *hmacsha256state) Reset() {
+	panic("HMACSHA256 cannot be reset")
+}
+
 // Size returns the size of the authentication tag.
-func (s *HMACSHA256) Size() int {
+func (s *hmacsha256state) Size() int {
 	return hmacsha256.Bytes
 }
 
 // BlockSize returns the block size for HMAC-SHA256.
-func (s *HMACSHA256) BlockSize() int {
+func (s *hmacsha256state) BlockSize() int {
 	return 2 * hmacsha256.Bytes
 }
 
 // NewHMACSHA256 returns a new HMAC-SHA256 hash using a key.
-func NewHMACSHA256(key []byte) HMAC {
-	s := new(HMACSHA256)
+func NewHMACSHA256(key []byte) hash.Hash {
+	s := new(hmacsha256state)
 
 	C.crypto_auth_hmacsha256_init(
 		(*C.crypto_auth_hmacsha256_state)(s),

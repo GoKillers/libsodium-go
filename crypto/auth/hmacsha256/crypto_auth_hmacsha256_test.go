@@ -9,13 +9,8 @@ var testCount = 100000
 
 func Test(t *testing.T) {
 	// Test the key generation
-	if *GenerateKey() == (Key{}) {
+	if *GenerateKey() == ([KeyBytes]byte{}) {
 		t.Error("Generated key is zero")
-	}
-
-	// Check statebytes
-	if StateBytes() != 208 {
-		t.Errorf("Incorrect number of State Bytes: %v", StateBytes())
 	}
 
 	// Fuzzing
@@ -24,7 +19,7 @@ func Test(t *testing.T) {
 	// Run tests
 	for i := 0; i < testCount; i++ {
 		var m []byte
-		var k Key
+		var k [KeyBytes]byte
 
 		// Fuzz the test inputs
 		f.Fuzz(&m)

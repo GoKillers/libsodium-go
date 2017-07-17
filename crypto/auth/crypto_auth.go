@@ -18,17 +18,11 @@ const (
 	Primitive string = C.crypto_auth_PRIMITIVE
 )
 
-// Key represents a secret key.
-type Key [KeyBytes]byte
-
-// MAC represents an authentication tag.
-type MAC [Bytes]byte
-
 // New returns the authentication tag for input data and a key.
-func New(in []byte, key *Key) *MAC {
+func New(in []byte, key *[KeyBytes]byte) *[Bytes]byte {
 	support.NilPanic(key == nil, "key")
 
-	out := new(MAC)
+	out := new([Bytes]byte)
 
 	C.crypto_auth(
 		(*C.uchar)(&out[0]),
@@ -40,7 +34,7 @@ func New(in []byte, key *Key) *MAC {
 }
 
 // CheckMAC if the authentication tag is valid for input data and a key.
-func CheckMAC(in []byte, h *MAC, key *Key) (err error) {
+func CheckMAC(in []byte, h *[Bytes]byte, key *[KeyBytes]byte) (err error) {
 	support.NilPanic(h == nil, "hmac")
 	support.NilPanic(key == nil, "key")
 
@@ -58,8 +52,8 @@ func CheckMAC(in []byte, h *MAC, key *Key) (err error) {
 }
 
 // GenerateKey generates a secret key.
-func GenerateKey() *Key {
-	k := new(Key)
+func GenerateKey() *[KeyBytes]byte {
+	k := new([Bytes]byte)
 	C.crypto_auth_keygen((*C.uchar)(&k[0]))
 	return k
 }
