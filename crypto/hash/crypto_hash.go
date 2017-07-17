@@ -6,13 +6,11 @@ package hash
 import "C"
 import "github.com/GoKillers/libsodium-go/support"
 
-// Bytes represents the size of the hash in bytes
+// Bytes is the size of the hash in bytes
 const Bytes int = C.crypto_hash_BYTES
 
-// Primitive returns the name of the used algorithm
-func Primitive() string {
-	return C.GoString(C.crypto_hash_primitive())
-}
+// Primitive is the name of the used algorithm
+const Primitive string = C.crypto_hash_PRIMITIVE
 
 // Hash returns the cryptographic hash of input data `in`
 func Hash(in []byte) []byte {

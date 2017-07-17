@@ -10,8 +10,8 @@ var testCount = 5000
 
 func Test(t *testing.T) {
 	// Check algorithm name
-	if Primitive() != "sha512" {
-		t.Errorf("Incorrect primitive: %s", Primitive())
+	if Primitive != "sha512" {
+		t.Errorf("Incorrect primitive: %s", Primitive)
 	}
 
 	// Fuzzing
