@@ -7,10 +7,16 @@ import "C"
 import (
 	"github.com/GoKillers/libsodium-go/crypto/aead/aes256gcm"
 	"github.com/GoKillers/libsodium-go/support"
+	"unsafe"
 )
 
-// AES256GCM represents the cryptographic state for the AES256 GCM cipher
-type AES256GCM C.crypto_aead_aes256gcm_state
+// AES256GCM state struct
+type AES256GCM struct {
+	// Represents crypto_aead_aes256gcm_state, which must be 16 byte aligned.
+	// This is not enforced by Go, so 16 extra bytes are allocated and
+	// the 512 aligned bytes in them are used.
+	state1 [512 + 16]byte
+}
 
 // NewAES256GCM returns a AES256GCM cipher for an AES256 key.
 func NewAES256GCM(k *[aes256gcm.KeyBytes]byte) AEAD {
@@ -19,10 +25,24 @@ func NewAES256GCM(k *[aes256gcm.KeyBytes]byte) AEAD {
 	ctx := new(AES256GCM)
 
 	C.crypto_aead_aes256gcm_beforenm(
-		(*C.crypto_aead_aes256gcm_state)(ctx),
+		ctx.state(),
 		(*C.uchar)(&k[0]))
 
 	return ctx
+}
+
+// state returns a pointer to the space allocated for the state
+func (a *AES256GCM) state() *C.crypto_aead_aes256gcm_state {
+	var offset uintptr
+	mod := uintptr(unsafe.Pointer(&a.state1)) % 16
+
+	if mod == 0 {
+		offset = mod
+	} else {
+		offset = 16 - mod
+	}
+
+	return (*C.crypto_aead_aes256gcm_state)(unsafe.Pointer(&a.state1[offset]))
 }
 
 // NonceSize returns the size of the nonce for Seal() and Open()
@@ -51,7 +71,7 @@ func (a *AES256GCM) Seal(dst, nonce, plaintext, additionalData []byte) (ret []by
 		(C.ulonglong)(len(additionalData)),
 		(*C.uchar)(nil),
 		(*C.uchar)(&nonce[0]),
-		(*C.crypto_aead_aes256gcm_state)(a))
+		a.state())
 
 	return
 }
@@ -73,7 +93,7 @@ func (a *AES256GCM) Open(dst, nonce, ciphertext, additionalData []byte) (ret []b
 		(*C.uchar)(support.BytePointer(additionalData)),
 		(C.ulonglong)(len(additionalData)),
 		(*C.uchar)(&nonce[0]),
-		(*C.crypto_aead_aes256gcm_state)(a))
+		a.state())
 
 	if exit != 0 {
 		err = &support.VerificationError{}
@@ -100,7 +120,7 @@ func (a *AES256GCM) SealDetached(dst, nonce, plaintext, additionalData []byte) (
 		(C.ulonglong)(len(additionalData)),
 		(*C.uchar)(nil),
 		(*C.uchar)(&nonce[0]),
-		(*C.crypto_aead_aes256gcm_state)(a))
+		a.state())
 
 	return
 }
@@ -122,7 +142,7 @@ func (a *AES256GCM) OpenDetached(dst, nonce, ciphertext, mac, additionalData []b
 		(*C.uchar)(support.BytePointer(additionalData)),
 		(C.ulonglong)(len(additionalData)),
 		(*C.uchar)(&nonce[0]),
-		(*C.crypto_aead_aes256gcm_state)(a))
+		a.state())
 
 	if exit != 0 {
 		err = &support.VerificationError{}
