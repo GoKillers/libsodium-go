@@ -1,6 +1,9 @@
 package support
 
-import "fmt"
+import (
+	"fmt"
+	"unsafe"
+)
 
 //
 // Internal support functions
@@ -31,4 +34,11 @@ func BytePointer(b []byte) *uint8 {
 	} else {
 		return nil
 	}
+}
+
+// AlignedSlice returns a memory aligned slice
+func AlignedSlice(size, alignment int) []byte {
+	slice := make([]byte, size+alignment)
+	offset := alignment - int(uintptr(unsafe.Pointer(&slice[0])))%alignment
+	return slice[offset : offset+size]
 }

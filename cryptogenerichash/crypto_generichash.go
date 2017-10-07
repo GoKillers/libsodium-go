@@ -4,7 +4,10 @@ package generichash
 // #include <stdlib.h>
 // #include <sodium.h>
 import "C"
-import "github.com/GoKillers/libsodium-go/support"
+import (
+	"github.com/GoKillers/libsodium-go/support"
+	"unsafe"
+)
 
 func CryptoGenericHashBytesMin() int {
 	return int(C.crypto_generichash_bytes_min())
@@ -68,9 +71,11 @@ func CryptoGenericHashInit(key []byte, outlen int) (*C.struct_crypto_generichash
 		support.CheckSizeInRange(len(key), CryptoGenericHashKeyBytesMin(), CryptoGenericHashKeyBytesMax(), "key")
 	}
 
-	state := new(C.struct_crypto_generichash_blake2b_state)
+	state := (*C.struct_crypto_generichash_blake2b_state)(
+		unsafe.Pointer(&support.AlignedSlice(CryptoGenericHashStateBytes(), 64)[0]))
+
 	exit := int(C.crypto_generichash_init(
-		(*C.struct_crypto_generichash_blake2b_state)(state),
+		state,
 		(*C.uchar)(support.BytePointer(key)),
 		(C.size_t)(len(key)),
 		(C.size_t)(outlen)))
