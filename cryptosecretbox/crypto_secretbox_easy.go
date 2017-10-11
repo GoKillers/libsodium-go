@@ -53,17 +53,15 @@ func CryptoSecretBoxEasy(m []byte, n []byte, k []byte) ([]byte, int) {
 }
 
 func CryptoSecretBoxOpenEasy(c []byte, n []byte, k []byte) ([]byte, int) {
+	support.CheckSizeMin(c, CryptoSecretBoxMacBytes(), "msg")
 	support.CheckSize(n, CryptoSecretBoxNonceBytes(), "nonce")
 	support.CheckSize(k, CryptoSecretBoxKeyBytes(), "key")
-	cLen := len(c)
-	if cLen < CryptoSecretBoxMacBytes() {
-		return nil, -1
-	}
-	m := make([]byte, cLen-CryptoSecretBoxMacBytes())
+
+	m := make([]byte, len(c)-CryptoSecretBoxMacBytes())
 	exit := int(C.crypto_secretbox_open_easy(
 		(*C.uchar)(&m[0]),
 		(*C.uchar)(&c[0]),
-		(C.ulonglong)(cLen),
+		(C.ulonglong)(len(c)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&k[0])))
 

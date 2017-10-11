@@ -19,6 +19,7 @@ func CryptoBoxSeal(m []byte, pk []byte) ([]byte, int) {
 }
 
 func CryptoBoxSealOpen(c []byte, pk []byte, sk []byte) ([]byte, int) {
+	support.CheckSizeMin(c, CryptoBoxSealBytes(), "msg")
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
 	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
 	m := make([]byte, len(c)-CryptoBoxSealBytes())

@@ -71,9 +71,11 @@ func CryptoBoxEasy(m []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
 }
 
 func CryptoBoxOpenDetachedAfterNm(c []byte, mac []byte, n []byte, k []byte) ([]byte, int) {
+	support.CheckSizeMin(c, CryptoBoxMacBytes(), "msg")
 	support.CheckSize(mac, CryptoBoxMacBytes(), "mac")
 	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
 	support.CheckSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
+
 	m := make([]byte, len(c)-CryptoBoxMacBytes())
 	exit := int(C.crypto_box_open_detached_afternm(
 		(*C.uchar)(&m[0]),
@@ -87,6 +89,7 @@ func CryptoBoxOpenDetachedAfterNm(c []byte, mac []byte, n []byte, k []byte) ([]b
 }
 
 func CryptoBoxOpenDetached(c []byte, mac []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
+	support.CheckSizeMin(c, CryptoBoxMacBytes(), "msg")
 	support.CheckSize(mac, CryptoBoxMacBytes(), "mac")
 	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
@@ -105,6 +108,7 @@ func CryptoBoxOpenDetached(c []byte, mac []byte, n []byte, pk []byte, sk []byte)
 }
 
 func CryptoBoxOpenEasyAfterNm(c []byte, n []byte, k []byte) ([]byte, int) {
+	support.CheckSizeMin(c, CryptoBoxMacBytes(), "msg")
 	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
 	support.CheckSize(k, CryptoBoxBeforeNmBytes(), "shared secret key")
 	m := make([]byte, len(c)-CryptoBoxMacBytes())
@@ -119,6 +123,7 @@ func CryptoBoxOpenEasyAfterNm(c []byte, n []byte, k []byte) ([]byte, int) {
 }
 
 func CryptoBoxOpenEasy(c []byte, n []byte, pk []byte, sk []byte) ([]byte, int) {
+	support.CheckSizeMin(c, CryptoBoxMacBytes(), "msg")
 	support.CheckSize(n, CryptoBoxNonceBytes(), "nonce")
 	support.CheckSize(pk, CryptoBoxPublicKeyBytes(), "public key")
 	support.CheckSize(sk, CryptoBoxSecretKeyBytes(), "secret key")
