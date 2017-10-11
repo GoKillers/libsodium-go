@@ -48,18 +48,22 @@ func CryptoSecretBoxEasy(m []byte, n []byte, k []byte) ([]byte, int) {
 		(C.ulonglong)(len(m)),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&k[0])))
-
-	return c, exit
+	nonceAndEncrypted := support.BytesCombine(n, c)
+	return nonceAndEncrypted, exit
 }
 
 func CryptoSecretBoxOpenEasy(c []byte, n []byte, k []byte) ([]byte, int) {
 	support.CheckSize(n, CryptoSecretBoxNonceBytes(), "nonce")
 	support.CheckSize(k, CryptoSecretBoxKeyBytes(), "key")
-	m := make([]byte, len(c)-CryptoSecretBoxMacBytes())
+	cLen := len(c)
+	if cLen < CryptoSecretBoxMacBytes() {
+		return nil, -1
+	}
+	m := make([]byte, cLen-CryptoSecretBoxMacBytes())
 	exit := int(C.crypto_secretbox_open_easy(
 		(*C.uchar)(&m[0]),
 		(*C.uchar)(&c[0]),
-		(C.ulonglong)(len(c)),
+		(C.ulonglong)(cLen),
 		(*C.uchar)(&n[0]),
 		(*C.uchar)(&k[0])))
 

@@ -1,6 +1,7 @@
 package support
 
 import "fmt"
+import "bytes"
 
 //
 // Internal support functions
@@ -31,4 +32,8 @@ func BytePointer(b []byte) *uint8 {
 	} else {
 		return nil
 	}
+}
+
+func BytesCombine(pBytes ...[]byte) []byte {
+	return bytes.Join(pBytes, []byte(""))
 }
