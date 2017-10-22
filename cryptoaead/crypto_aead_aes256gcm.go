@@ -124,7 +124,7 @@ func CryptoAEADAES256GCMDecryptDetached(c, mac, ad, npub, k []byte) ([]byte, int
 func CryptoAEADAES256GCMBeforeNM(k []byte) ([]byte, int) {
 	support.CheckSize(k, CryptoAEADAES256GCMKeyBytes(), "secret key")
 
-	ctx := make([]byte, CryptoAEADAES256GCMStateBytes())
+	ctx := support.AlignedSlice(CryptoAEADAES256GCMStateBytes(), 16)
 
 	exit := int(C.crypto_aead_aes256gcm_beforenm(
 		(*C.crypto_aead_aes256gcm_state)(unsafe.Pointer(&ctx[0])),
