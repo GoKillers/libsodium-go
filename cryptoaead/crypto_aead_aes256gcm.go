@@ -149,7 +149,7 @@ func CryptoAEADAES256GCMEncryptAfterNM(m, ad, npub, ctx []byte) ([]byte, int) {
 		(C.ulonglong)(len(ad)),
 		(*C.uchar)(nil),
 		(*C.uchar)(&npub[0]),
-		(*[512]C.uchar)(unsafe.Pointer(&ctx[0]))))
+		(*C.crypto_aead_aes256gcm_state)(unsafe.Pointer(&ctx[0]))))
 
 	return c, exit
 }
@@ -171,7 +171,7 @@ func CryptoAEADAES256GCMDecryptAfterNM(c, ad, npub, ctx []byte) ([]byte, int) {
 		(*C.uchar)(support.BytePointer(ad)),
 		(C.ulonglong)(len(ad)),
 		(*C.uchar)(&npub[0]),
-		(*[512]C.uchar)(unsafe.Pointer(&ctx[0]))))
+		(*C.crypto_aead_aes256gcm_state)(unsafe.Pointer(&ctx[0]))))
 
 	return m, exit
 }
@@ -194,7 +194,7 @@ func CryptoAEADAES256GCMEncryptDetachedAfterNM(m, ad, npub, ctx []byte) ([]byte,
 		(C.ulonglong)(len(ad)),
 		(*C.uchar)(nil),
 		(*C.uchar)(&npub[0]),
-		(*[512]C.uchar)(unsafe.Pointer(&ctx[0]))))
+		(*C.crypto_aead_aes256gcm_state)(unsafe.Pointer(&ctx[0]))))
 
 	return c, mac, exit
 }
@@ -215,7 +215,7 @@ func CryptoAEADAES256GCMDecryptDetachedAfterNM(c, mac, ad, npub, ctx []byte) ([]
 		(*C.uchar)(support.BytePointer(ad)),
 		(C.ulonglong)(len(ad)),
 		(*C.uchar)(&npub[0]),
-		(*[512]C.uchar)(unsafe.Pointer(&ctx[0]))))
+		(*C.crypto_aead_aes256gcm_state)(unsafe.Pointer(&ctx[0]))))
 
 	return m, exit
 }

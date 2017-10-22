@@ -1,2 +1,3 @@
 #!/bin/sh
+export CC=clang
 exec go build ./...
