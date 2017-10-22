@@ -31,7 +31,7 @@ func CryptoKdfKeygen() []byte {
 func CryptoKdfDeriveFromKey(l int, i uint64, c string, k []byte) ([]byte, int) {
 	support.CheckSize(k, CryptoKdfKeybytes(), "keybytes")
 	support.CheckSize([]byte(c), CryptoKdfContextbytes(), "contextbytes")
-	support.CheckSizeInRange(l, CryptoKdfBytesMin(), CryptoKdfBytesMax(), "subkey_len")
+	support.CheckIntInRange(l, CryptoKdfBytesMin(), CryptoKdfBytesMax(), "subkey_len")
 	out := make([]byte, l)
 
 	exit := int(C.crypto_kdf_derive_from_key(
