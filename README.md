@@ -16,6 +16,10 @@ Team (as of now...)
 <li>Graham Smith (@neuegram)</li>
 </ul>
 
+Contributors
+------------
+Silkeh
+
 How to build
 ------------
 For linux, this should be easy since there's pkg-config support. Please make sure libsodium is installed on your system first.
