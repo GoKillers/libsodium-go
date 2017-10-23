@@ -14,10 +14,11 @@ func init() {
 
 // Sizes of nonces, key and mac.
 const (
-	KeyBytes   int = C.crypto_aead_aes256gcm_KEYBYTES  // Size of a secret key in bytes
-	NSecBytes  int = C.crypto_aead_aes256gcm_NSECBYTES // Size of a secret nonce in bytes
-	NonceBytes int = C.crypto_aead_aes256gcm_NPUBBYTES // Size of a nonce in bytes
-	ABytes     int = C.crypto_aead_aes256gcm_ABYTES    // Size of an authentication tag in bytes
+	KeyBytes        = C.crypto_aead_aes256gcm_KEYBYTES         // Size of a secret key in bytes
+	NSecBytes       = C.crypto_aead_aes256gcm_NSECBYTES        // Size of a secret nonce in bytes
+	NonceBytes      = C.crypto_aead_aes256gcm_NPUBBYTES        // Size of a nonce in bytes
+	ABytes          = C.crypto_aead_aes256gcm_ABYTES           // Size of an authentication tag in bytes
+	MessageBytesMax = C.crypto_aead_aes256gcm_MESSAGEBYTES_MAX // Maximum size of a message
 )
 
 // IsAvailable returns true if AES256 is available on the current CPU
@@ -35,6 +36,7 @@ func GenerateKey() *[KeyBytes]byte {
 // Encrypt a message `m` with additional data `ad` using a nonce `npub` and a secret key `k`.
 // A ciphertext (including authentication tag) and encryption status are returned.
 func Encrypt(m, ad []byte, nonce *[NonceBytes]byte, k *[KeyBytes]byte) (c []byte) {
+	support.CheckSizeMax(m, MessageBytesMax, "message")
 	support.NilPanic(k == nil, "secret key")
 	support.NilPanic(nonce == nil, "nonce")
 
@@ -85,6 +87,7 @@ func Decrypt(c, ad []byte, nonce *[NonceBytes]byte, k *[KeyBytes]byte) (m []byte
 // a nonce `npub` and a secret key `k`.
 // A ciphertext, authentication tag and encryption status are returned.
 func EncryptDetached(m, ad []byte, nonce *[NonceBytes]byte, k *[KeyBytes]byte) (c, mac []byte) {
+	support.CheckSizeMax(m, MessageBytesMax, "message")
 	support.NilPanic(k == nil, "secret key")
 	support.NilPanic(nonce == nil, "nonce")
 
