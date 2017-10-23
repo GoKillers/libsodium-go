@@ -7,14 +7,17 @@ import "C"
 import "github.com/GoKillers/libsodium-go/support"
 import "unsafe"
 
-// SeedBytes returns the number of bytes required
+// SeedBytes represents the number of bytes required
 // for seeding RandomBytesBufDeterministic.
-const SeedBytes int = C.randombytes_SEEDBYTES
+const SeedBytes = C.randombytes_SEEDBYTES
+
+// BytesMax represents the maximum number of random bytes returned
+const BytesMax = C.randombytes_BYTES_MAX
 
 // Bytes returns a specified number of random bytes.
-// It is essentially a wrapper around RandomBytesBuf for convenience.
+// It is essentially a wrapper around Read for convenience.
 // Note that this behaviour is different than in NaCl and libsodium,
-// where this function behaves the same as RandomBytesBuf.
+// where this function behaves the same as Read.
 func Bytes(size int) []byte {
 	buf := make([]byte, size)
 	Read(buf)
@@ -23,6 +26,7 @@ func Bytes(size int) []byte {
 
 // Read fills a buffer with random bytes.
 func Read(buf []byte) {
+	support.CheckSizeMax(buf, BytesMax, "buffer")
 	C.randombytes_buf(
 		unsafe.Pointer(support.BytePointer(buf)),
 		C.size_t(len(buf)))
@@ -31,6 +35,7 @@ func Read(buf []byte) {
 // ReadDeterministic fills a buffer with bytes that are
 // indistinguishable from random bytes without knowing seed.
 func ReadDeterministic(buf, seed []byte) {
+	support.CheckSizeMax(buf, BytesMax, "buffer")
 	support.CheckSize(seed, SeedBytes, "seed")
 
 	C.randombytes_buf_deterministic(
