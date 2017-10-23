@@ -18,7 +18,15 @@ func CheckSize(buf []byte, expected int, descrip string) {
 // and panics when this is not the case.
 func CheckSizeMin(buf []byte, min int, descrip string) {
 	if len(buf) < min {
-		panic(fmt.Sprintf("Incorrect %s buffer size, expected (>%d), got (%d).", descrip, min, len(buf)))
+		panic(fmt.Sprintf("Incorrect %s buffer size, expected (>=%d), got (%d).", descrip, min, len(buf)))
+	}
+}
+
+// CheckSizeMax checks if the length of a byte slice is less or equal than a minimum length,
+// and panics when this is not the case.
+func CheckSizeMax(buf []byte, max uint64, descrip string) {
+	if uint64(len(buf)) > max {
+		panic(fmt.Sprintf("Incorrect %s buffer size, expected (<=%d), got (%d).", descrip, max, len(buf)))
 	}
 }
 
