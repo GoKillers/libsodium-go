@@ -14,9 +14,10 @@ func init() {
 
 // Stream byte lengths and algorithm name
 const (
-	KeyBytes   int    = C.crypto_stream_KEYBYTES   // Length of a secret key
-	NonceBytes int    = C.crypto_stream_NONCEBYTES // Length of a nonce
-	Primitive  string = C.crypto_stream_PRIMITIVE  // Name of the used algorithm
+	KeyBytes        = C.crypto_stream_KEYBYTES         // Length of a secret key
+	NonceBytes      = C.crypto_stream_NONCEBYTES       // Length of a nonce
+	MessageBytesMax = C.crypto_stream_MESSAGEBYTES_MAX // Maximum length of a message
+	Primitive       = C.crypto_stream_PRIMITIVE        // Name of the used algorithm
 )
 
 // KeyStream fills an output buffer `c` with pseudo random bytes using a nonce `n` and a secret key `k`.
@@ -38,6 +39,7 @@ func KeyStream(c []byte, n *[NonceBytes]byte, k *[KeyBytes]byte) {
 // XORKeyStream encrypts a message `m` using a nonce `n` and a secret key `k` and puts the resulting ciphertext into `c`.
 // If `m` and `c` are the same slice, in-place encryption is performed.
 func XORKeyStream(c, m []byte, n *[NonceBytes]byte, k *[KeyBytes]byte) {
+	support.CheckSizeMax(m, MessageBytesMax, "message")
 	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "key")
 	support.CheckSizeGreaterOrEqual(c, m, "output", "input")

@@ -14,8 +14,9 @@ func init() {
 
 // Required length of secret key and nonce
 const (
-	KeyBytes   int = C.crypto_stream_chacha20_KEYBYTES
-	NonceBytes int = C.crypto_stream_chacha20_NONCEBYTES
+	KeyBytes        = C.crypto_stream_chacha20_KEYBYTES
+	NonceBytes      = C.crypto_stream_chacha20_NONCEBYTES
+	MessageBytesMax = C.crypto_stream_chacha20_MESSAGEBYTES_MAX
 )
 
 // KeyStream fills an output buffer `c` with pseudo random bytes using a nonce `n` and a secret key `k`.
@@ -37,6 +38,7 @@ func KeyStream(c []byte, n *[NonceBytes]byte, k *[KeyBytes]byte) {
 // XORKeyStream encrypts a message `m` using a nonce `n` and a secret key `k` and puts the resulting ciphertext into `c`.
 // If `m` and `c` are the same slice, in-place encryption is performed.
 func XORKeyStream(c, m []byte, n *[NonceBytes]byte, k *[KeyBytes]byte) {
+	support.CheckSizeMax(m, MessageBytesMax, "message")
 	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "key")
 	support.CheckSizeGreaterOrEqual(c, m, "output", "input")
@@ -57,6 +59,7 @@ func XORKeyStream(c, m []byte, n *[NonceBytes]byte, k *[KeyBytes]byte) {
 // but with a block counter starting at `ic`.
 // If `m` and `c` are the same slice, in-place encryption is performed.
 func XORKeyStreamIC(c, m []byte, n *[NonceBytes]byte, k *[KeyBytes]byte, ic uint64) {
+	support.CheckSizeMax(m, MessageBytesMax, "message")
 	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "key")
 	support.CheckSizeGreaterOrEqual(c, m, "output", "input")
