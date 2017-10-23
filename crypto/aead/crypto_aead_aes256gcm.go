@@ -58,6 +58,7 @@ func (a *AES256GCM) Overhead() int {
 // Seal encrypts plaintext using nonce and additional data and appends it to a destination.
 // See aead.AEAD for details.
 func (a *AES256GCM) Seal(dst, nonce, plaintext, additionalData []byte) (ret []byte) {
+	support.CheckSizeMax(plaintext, aes256gcm.MessageBytesMax, "message")
 	support.CheckSize(nonce, a.NonceSize(), "nonce")
 
 	ret, c := appendSlices(dst, len(plaintext)+a.Overhead())
@@ -105,6 +106,7 @@ func (a *AES256GCM) Open(dst, nonce, ciphertext, additionalData []byte) (ret []b
 // SealDetached encrypts plaintext using nonce and additional data and appends it to a destination.
 // See aead.AEAD for details.
 func (a *AES256GCM) SealDetached(dst, nonce, plaintext, additionalData []byte) (ret, mac []byte) {
+	support.CheckSizeMax(plaintext, aes256gcm.MessageBytesMax, "message")
 	support.CheckSize(nonce, a.NonceSize(), "nonce")
 
 	ret, c := appendSlices(dst, len(plaintext))
