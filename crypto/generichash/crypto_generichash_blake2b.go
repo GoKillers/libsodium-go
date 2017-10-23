@@ -7,6 +7,7 @@ import "C"
 import (
 	"github.com/GoKillers/libsodium-go/support"
 	"hash"
+	"unsafe"
 )
 
 // The following constants reflect the properties of the Blake2b hash:
@@ -22,8 +23,12 @@ const (
 )
 
 type blake2b struct {
-	l C.size_t
-	s *C.crypto_generichash_blake2b_state
+	// Represents the length of the hash
+	len C.size_t
+	// Represents crypto_generichash_blake2b_state, which must be 64 byte aligned.
+	// This is not enforced by Go, so 64 extra bytes are allocated and
+	// the 384 aligned bytes in them are used.
+	state1 [384 + 64]byte
 }
 
 // SumBlake2b returns the Blake2b hash of input data `in` in output buffer `out`.
@@ -78,14 +83,13 @@ func NewBlake2b(size int, key []byte) hash.Hash {
 	}
 
 	s := &blake2b{
-		l: C.size_t(size),
-		s: new(C.crypto_generichash_blake2b_state),
+		len: C.size_t(size),
 	}
 
-	C.crypto_generichash_blake2b_init(s.s,
+	C.crypto_generichash_blake2b_init(s.state(),
 		(*C.uchar)(support.BytePointer(key)),
 		C.size_t(len(key)),
-		s.l)
+		s.len)
 
 	return s
 }
@@ -104,23 +108,36 @@ func NewBlake2bSaltPersonal(size int, key, salt, personal []byte) hash.Hash {
 	}
 
 	s := &blake2b{
-		l: C.size_t(size),
-		s: new(C.crypto_generichash_blake2b_state),
+		len: C.size_t(size),
 	}
 
-	C.crypto_generichash_blake2b_init_salt_personal(s.s,
+	C.crypto_generichash_blake2b_init_salt_personal(s.state(),
 		(*C.uchar)(support.BytePointer(key)),
 		C.size_t(len(key)),
-		s.l,
+		s.len,
 		(*C.uchar)(&salt[0]),
 		(*C.uchar)(&personal[0]))
 
 	return s
 }
 
+// state returns a pointer to the space allocated for the state
+func (s *blake2b) state() *C.crypto_generichash_blake2b_state {
+	var offset uintptr
+	mod := uintptr(unsafe.Pointer(&s.state1)) % 64
+
+	if mod == 0 {
+		offset = mod
+	} else {
+		offset = 64 - mod
+	}
+
+	return (*C.crypto_generichash_blake2b_state)(unsafe.Pointer(&s.state1[offset]))
+}
+
 // Write adds data to the running hash.
 func (s *blake2b) Write(p []byte) (int, error) {
-	C.crypto_generichash_blake2b_update(s.s,
+	C.crypto_generichash_blake2b_update(s.state(),
 		(*C.uchar)(support.BytePointer(p)),
 		C.ulonglong(len(p)))
 
@@ -129,11 +146,11 @@ func (s *blake2b) Write(p []byte) (int, error) {
 
 // Sum returns the calculated hash appended to `b`.
 func (s *blake2b) Sum(b []byte) []byte {
-	out := append(b, make([]byte, s.l)...)
+	out := append(b, make([]byte, s.len)...)
 
-	C.crypto_generichash_blake2b_final(s.s,
+	C.crypto_generichash_blake2b_final(s.state(),
 		(*C.uchar)(&out[len(b)]),
-		s.l)
+		s.len)
 
 	return out
 }
@@ -145,7 +162,7 @@ func (s *blake2b) Reset() {
 
 // Size returns the number of bytes Sum will return.
 func (s *blake2b) Size() int {
-	return int(s.l)
+	return int(s.len)
 }
 
 // Block size returns the underlying block size.

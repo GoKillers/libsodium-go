@@ -8,6 +8,7 @@ import "C"
 import (
 	"github.com/GoKillers/libsodium-go/support"
 	"hash"
+	"unsafe"
 )
 
 // The following constants reflect the properties of the generic hash:
@@ -22,8 +23,12 @@ const (
 )
 
 type state struct {
-	l C.size_t
-	s *C.crypto_generichash_state
+	// Represents the length of the hash
+	len C.size_t
+	// Represents crypto_generichash_state, which must be 64 byte aligned.
+	// This is not enforced by Go, so 64 extra bytes are allocated and
+	// the 384 aligned bytes in them are used.
+	state1 [384 + 64]byte
 }
 
 // Sum returns the cryptographic hash of input data `in` in output buffer `out`.
@@ -56,21 +61,34 @@ func New(size int, key []byte) hash.Hash {
 	}
 
 	s := &state{
-		l: C.size_t(size),
-		s: new(C.crypto_generichash_state),
+		len: C.size_t(size),
 	}
 
-	C.crypto_generichash_init(s.s,
+	C.crypto_generichash_init(s.state(),
 		(*C.uchar)(support.BytePointer(key)),
 		C.size_t(len(key)),
-		s.l)
+		s.len)
 
 	return s
 }
 
+// state returns a pointer to the space allocated for the state
+func (s *state) state() *C.crypto_generichash_state {
+	var offset uintptr
+	mod := uintptr(unsafe.Pointer(&s.state1)) % 64
+
+	if mod == 0 {
+		offset = mod
+	} else {
+		offset = 64 - mod
+	}
+
+	return (*C.crypto_generichash_state)(unsafe.Pointer(&s.state1[offset]))
+}
+
 // Write adds data to the running hash.
 func (s *state) Write(p []byte) (int, error) {
-	C.crypto_generichash_update(s.s,
+	C.crypto_generichash_update(s.state(),
 		(*C.uchar)(support.BytePointer(p)),
 		C.ulonglong(len(p)))
 
@@ -79,11 +97,11 @@ func (s *state) Write(p []byte) (int, error) {
 
 // Sum returns the calculated hash appended to `b`.
 func (s *state) Sum(b []byte) []byte {
-	out := append(b, make([]byte, s.l)...)
+	out := append(b, make([]byte, s.len)...)
 
-	C.crypto_generichash_final(s.s,
+	C.crypto_generichash_final(s.state(),
 		(*C.uchar)(&out[len(b)]),
-		s.l)
+		s.len)
 
 	return out
 }
@@ -95,7 +113,7 @@ func (s *state) Reset() {
 
 // Size returns the number of bytes Sum will return.
 func (s *state) Size() int {
-	return int(s.l)
+	return int(s.len)
 }
 
 // Block size returns the underlying block size.
