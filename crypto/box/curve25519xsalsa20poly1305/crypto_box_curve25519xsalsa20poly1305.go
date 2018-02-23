@@ -1,5 +1,9 @@
 // Package curve25519xsalsa20poly1305 contains the libsodium bindings
 // for public-key authenticated encryption using Curve25519-XSalsa20-Poly1305.
+//
+// Note that the message length is not checked against MessageBytesMax,
+// as this is based on SODIUM_SIZE_MAX, which is the minimum of UINT64_MAX and SIZE_MAX.
+// Both can be expected to be higher than the maximum size of an integer and byte slice.
 package curve25519xsalsa20poly1305
 
 // #cgo pkg-config: libsodium
@@ -10,14 +14,15 @@ import "github.com/GoKillers/libsodium-go/support"
 
 // Lengths of various arguments.
 const (
-	SeedBytes      = C.crypto_box_curve25519xsalsa20poly1305_SEEDBYTES      // Required size of a keypair seed.
-	PublicKeyBytes = C.crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES // Size of a public key.
-	SecretKeyBytes = C.crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES // Size of a secret key.
-	NonceBytes     = C.crypto_box_curve25519xsalsa20poly1305_NONCEBYTES     // Size of a nonce.
-	MACBytes       = C.crypto_box_curve25519xsalsa20poly1305_MACBYTES       // Size of an authentication tag.
-	SharedKeyBytes = C.crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES  // Size of a shared secret key.
-	ZeroBytes      = C.crypto_box_ZEROBYTES                                 // Size of the zero padding of the message.
-	BoxZeroBytes   = C.crypto_box_BOXZEROBYTES                              // Size of NaCl box / ciphertext
+	SeedBytes       = C.crypto_box_curve25519xsalsa20poly1305_SEEDBYTES        // Required size of a keypair seed.
+	PublicKeyBytes  = C.crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES   // Size of a public key.
+	SecretKeyBytes  = C.crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES   // Size of a secret key.
+	NonceBytes      = C.crypto_box_curve25519xsalsa20poly1305_NONCEBYTES       // Size of a nonce.
+	MACBytes        = C.crypto_box_curve25519xsalsa20poly1305_MACBYTES         // Size of an authentication tag.
+	SharedKeyBytes  = C.crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES    // Size of a shared secret key.
+	MessageBytesMax = C.crypto_box_curve25519xsalsa20poly1305_MESSAGEBYTES_MAX // Maximum message size
+	ZeroBytes       = C.crypto_box_ZEROBYTES                                   // Size of the zero padding of the message.
+	BoxZeroBytes    = C.crypto_box_BOXZEROBYTES                                // Size of NaCl box / ciphertext
 )
 
 // GenerateKeyFromSeed returns a keypair generated from a given seed.

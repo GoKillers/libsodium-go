@@ -1,4 +1,8 @@
 // Package box contains the libsodium bindings for public-key authenticated encryption.
+//
+// Note that the message length is not checked against MessageBytesMax,
+// as this is based on SODIUM_SIZE_MAX, which is the minimum of UINT64_MAX and SIZE_MAX.
+// Both can be expected to be higher than the maximum size of an integer and byte slice.
 package box
 
 // #cgo pkg-config: libsodium
@@ -9,14 +13,15 @@ import "github.com/GoKillers/libsodium-go/support"
 
 // Lengths of various arguments.
 const (
-	SeedBytes      = C.crypto_box_SEEDBYTES      // Required size of a keypair seed.
-	PublicKeyBytes = C.crypto_box_PUBLICKEYBYTES // Size of a public key.
-	SecretKeyBytes = C.crypto_box_SECRETKEYBYTES // Size of a secret key.
-	NonceBytes     = C.crypto_box_NONCEBYTES     // Size of a nonce.
-	MACBytes       = C.crypto_box_MACBYTES       // Size of an authentication tag.
-	Primitive      = C.crypto_box_PRIMITIVE      // Name of the algorithm used by crypto/box.
-	SharedKeyBytes = C.crypto_box_BEFORENMBYTES  // Size of a shared secret key.
-	SealBytes      = C.crypto_box_SEALBYTES      // Overhead of a sealed encryption
+	SeedBytes       = C.crypto_box_SEEDBYTES        // Required size of a keypair seed.
+	PublicKeyBytes  = C.crypto_box_PUBLICKEYBYTES   // Size of a public key.
+	SecretKeyBytes  = C.crypto_box_SECRETKEYBYTES   // Size of a secret key.
+	NonceBytes      = C.crypto_box_NONCEBYTES       // Size of a nonce.
+	MACBytes        = C.crypto_box_MACBYTES         // Size of an authentication tag.
+	Primitive       = C.crypto_box_PRIMITIVE        // Name of the algorithm used by crypto/box.
+	SharedKeyBytes  = C.crypto_box_BEFORENMBYTES    // Size of a shared secret key.
+	SealBytes       = C.crypto_box_SEALBYTES        // Overhead of a sealed encryption.
+	MessageBytesMax = C.crypto_box_MESSAGEBYTES_MAX // Maximum message size.
 )
 
 // GenerateKeyFromSeed returns a keypair generated from a given seed.
