@@ -24,8 +24,8 @@ func checkResult(fail bool, err error, a, b []byte) bool {
 func TestCryptoBoxSalsa(t *testing.T) {
 	// Test if GenerateKeysFromSeed
 	pk, sk := GenerateKeys()
-	zeroes := new([32]byte)
-	if *pk == PublicKey(*zeroes) || *sk == SecretKey(*zeroes) {
+	zeroes := new([PublicKeyBytes]byte)
+	if *pk == *zeroes || *sk == *zeroes {
 		t.Error("GenerateKeys generated an all zero key.")
 	}
 

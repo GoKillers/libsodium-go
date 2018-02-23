@@ -20,21 +20,12 @@ const (
 	BoxZeroBytes   = C.crypto_box_BOXZEROBYTES                              // Size of NaCl box / ciphertext
 )
 
-// PublicKey represents a public key.
-type PublicKey [PublicKeyBytes]byte
-
-// SecretKey represents a secret (private) key.
-type SecretKey [SecretKeyBytes]byte
-
-// SharedKey represents a shared secret key generated from a public/secret key pair.
-type SharedKey [SharedKeyBytes]byte
-
 // GenerateKeysFromSeed returns a keypair generated from a given seed.
-func GenerateKeysFromSeed(seed []byte) (pk *PublicKey, sk *SecretKey) {
+func GenerateKeysFromSeed(seed []byte) (pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) {
 	support.CheckSize(seed, SeedBytes, "seed")
 
-	pk = new(PublicKey)
-	sk = new(SecretKey)
+	pk = new([PublicKeyBytes]byte)
+	sk = new([SecretKeyBytes]byte)
 
 	C.crypto_box_curve25519xsalsa20poly1305_seed_keypair(
 		(*C.uchar)(&pk[0]),
@@ -45,9 +36,9 @@ func GenerateKeysFromSeed(seed []byte) (pk *PublicKey, sk *SecretKey) {
 }
 
 // GenerateKeys returns a keypair.
-func GenerateKeys() (pk *PublicKey, sk *SecretKey) {
-	pk = new(PublicKey)
-	sk = new(SecretKey)
+func GenerateKeys() (pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) {
+	pk = new([PublicKeyBytes]byte)
+	sk = new([SecretKeyBytes]byte)
 
 	C.crypto_box_curve25519xsalsa20poly1305_keypair(
 		(*C.uchar)(&pk[0]),
@@ -57,11 +48,11 @@ func GenerateKeys() (pk *PublicKey, sk *SecretKey) {
 }
 
 // Precompute generates a shared key from a recipients public key `pk` and a sender's secret key `sk`.
-func Precompute(pk *PublicKey, sk *SecretKey) (k *SharedKey) {
+func Precompute(pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (k *[SharedKeyBytes]byte) {
 	support.NilPanic(pk == nil, "public key")
 	support.NilPanic(sk == nil, "secret key")
 
-	k = new(SharedKey)
+	k = new([SharedKeyBytes]byte)
 
 	C.crypto_box_curve25519xsalsa20poly1305_beforenm(
 		(*C.uchar)(&k[0]),
@@ -72,9 +63,9 @@ func Precompute(pk *PublicKey, sk *SecretKey) (k *SharedKey) {
 }
 
 // Seal encrypts a message `m` using nonce `n`, public key `pk` and secret key `sk`.
-// Returns a ciphertext and a boolean indicating successful encryption.
+// Returns the encrypted message.
 // Note: message `m` requires `ZeroBytes` of padding on the front.
-func Seal(m, n []byte, pk *PublicKey, sk *SecretKey) (c []byte) {
+func Seal(m, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (c []byte) {
 	support.CheckSizeMin(m, ZeroBytes, "message with padding")
 	support.CheckSize(n, NonceBytes, "nonce")
 	support.NilPanic(pk == nil, "public key")
@@ -94,9 +85,9 @@ func Seal(m, n []byte, pk *PublicKey, sk *SecretKey) (c []byte) {
 }
 
 // Open decrypts a ciphertext `c` using nonce `n`, public key `pk` and secret key `sk`.
-// Returns the decrypted message and a boolean indicating successful decryption and verification.
+// Returns the decrypted message and an error indicating decryption or verification failure.
 // Note: ciphertext `c` requires `BoxZeroBytes` padding on the front.
-func Open(c, n []byte, pk *PublicKey, sk *SecretKey) (m []byte, err error) {
+func Open(c, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (m []byte, err error) {
 	support.CheckSizeMin(c, ZeroBytes, "ciphertext with padding")
 	support.CheckSize(n, NonceBytes, "nonce")
 	support.NilPanic(pk == nil, "public key")
@@ -120,9 +111,9 @@ func Open(c, n []byte, pk *PublicKey, sk *SecretKey) (m []byte, err error) {
 }
 
 // SealAfterPrecomputation encrypts a message `m` with nonce `n` from a shared secret key `k`.
-// Returns the decrypted message and a boolean indicating successful encryption.
+// Returns the encrypted message.
 // Note: message `m` requires `ZeroBytes` of padding on the front.
-func SealAfterPrecomputation(m, n []byte, k *SharedKey) (c []byte) {
+func SealAfterPrecomputation(m, n []byte, k *[SharedKeyBytes]byte) (c []byte) {
 	support.CheckSizeMin(m, ZeroBytes, "message with padding")
 	support.CheckSize(n, NonceBytes, "nonce")
 	support.NilPanic(k == nil, "shared key")
@@ -140,9 +131,9 @@ func SealAfterPrecomputation(m, n []byte, k *SharedKey) (c []byte) {
 }
 
 // OpenAfterPrecomputation decrypts a ciphertext `c` using nonce `n` from a shared secret key `k`.
-// Returns the decrypted message and a boolean indicating successful decryption and verification.
+// Returns the decrypted message and an error indicating decryption or verification failure.
 // Note: ciphertext `c` requires `BoxZeroBytes` padding on the front.
-func OpenAfterPrecomputation(c, n []byte, k *SharedKey) (m []byte, err error) {
+func OpenAfterPrecomputation(c, n []byte, k *[SharedKeyBytes]byte) (m []byte, err error) {
 	support.CheckSizeMin(c, ZeroBytes, "ciphertext with padding")
 	support.CheckSize(n, NonceBytes, "nonce")
 	support.NilPanic(k == nil, "shared key")

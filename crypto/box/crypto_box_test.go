@@ -29,8 +29,8 @@ func TestCryptoBox(t *testing.T) {
 
 	// Test if GenerateKeys creates a non-zero key
 	pk, sk := GenerateKeys()
-	zeroes := new([32]byte)
-	if *pk == PublicKey(*zeroes) || *sk == SecretKey(*zeroes) {
+	zeroes := new([PublicKeyBytes]byte)
+	if *pk == *zeroes || *sk == *zeroes {
 		t.Error("GenerateKeys generated an all zero key.")
 	}
 

@@ -15,7 +15,7 @@ const (
 // NaClSealAfterPrecomputation encrypts a message `m` with nonce `n` from a shared key `k`.
 // Returns the decrypted message and a boolean indicating successful encryption.
 // Note: message `m` requires `ZeroBytes` of padding on the front.
-func NaClSealAfterPrecomputation(m, n []byte, k *SharedKey) (c []byte) {
+func NaClSealAfterPrecomputation(m, n []byte, k *[SharedKeyBytes]byte) (c []byte) {
 	support.CheckSizeMin(m, ZeroBytes, "message with padding")
 	support.CheckSize(n, NonceBytes, "nonce")
 	support.NilPanic(k == nil, "shared key")
@@ -35,7 +35,7 @@ func NaClSealAfterPrecomputation(m, n []byte, k *SharedKey) (c []byte) {
 // NaClOpenAfterPrecomputation decrypts a cyphertext `c` using nonce `n` from a shared key `k`.
 // Returns the decrypted message and a boolean indicating successful decryption and verification.
 // Note: ciphertext `c` requires `BoxZeroBytes` padding on the front.
-func NaClOpenAfterPrecomputation(c, n []byte, k *SharedKey) (m []byte, err error) {
+func NaClOpenAfterPrecomputation(c, n []byte, k *[SharedKeyBytes]byte) (m []byte, err error) {
 	support.CheckSizeMin(c, ZeroBytes, "ciphertext with padding")
 	support.CheckSize(n, NonceBytes, "nonce")
 	support.NilPanic(k == nil, "shared key")
@@ -59,7 +59,7 @@ func NaClOpenAfterPrecomputation(c, n []byte, k *SharedKey) (m []byte, err error
 // NaClSeal encrypts a message `m` using nonce `n`, public key `pk` and secret key `sk`.
 // Returns a ciphertext and a boolean indicating successful encryption.
 // Note: message `m` requires `ZeroBytes` of padding on the front.
-func NaClSeal(m, n []byte, pk *PublicKey, sk *SecretKey) (c []byte) {
+func NaClSeal(m, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (c []byte) {
 	support.CheckSizeMin(m, ZeroBytes, "message with padding")
 	support.CheckSize(n, NonceBytes, "nonce")
 	support.NilPanic(pk == nil, "public key")
@@ -81,7 +81,7 @@ func NaClSeal(m, n []byte, pk *PublicKey, sk *SecretKey) (c []byte) {
 // NaClOpen decrypts a ciphertext `c` using nonce `n`, public key `pk` and secret key `sk`.
 // Returns the decrypted message and a boolean indicating successful decryption and verification.
 // Note: ciphertext `c` requires `BoxZeroBytes` padding on the front.
-func NaClOpen(c, n []byte, pk *PublicKey, sk *SecretKey) (m []byte, err error) {
+func NaClOpen(c, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (m []byte, err error) {
 	support.CheckSizeMin(c, ZeroBytes, "ciphertext with padding")
 	support.CheckSize(n, NonceBytes, "nonce")
 	support.NilPanic(pk == nil, "public key")
