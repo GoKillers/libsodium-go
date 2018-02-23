@@ -21,8 +21,8 @@ const (
 )
 
 // GenerateKeyFromSeed returns a keypair generated from a given seed.
-func GenerateKeyFromSeed(seed []byte) (pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) {
-	support.CheckSize(seed, SeedBytes, "seed")
+func GenerateKeyFromSeed(seed *[SeedBytes]byte) (pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) {
+	support.NilPanic(seed == nil, "seed")
 
 	pk = new([PublicKeyBytes]byte)
 	sk = new([SecretKeyBytes]byte)
@@ -65,9 +65,9 @@ func Precompute(pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (k *[SharedK
 // Seal encrypts a message `m` using nonce `n`, public key `pk` and secret key `sk`.
 // Returns the encrypted message.
 // Note: message `m` requires `ZeroBytes` of padding on the front.
-func Seal(m, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (c []byte) {
+func Seal(m []byte, n *[NonceBytes]byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (c []byte) {
 	support.CheckSizeMin(m, ZeroBytes, "message with padding")
-	support.CheckSize(n, NonceBytes, "nonce")
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(pk == nil, "public key")
 	support.NilPanic(sk == nil, "secret key")
 
@@ -87,9 +87,9 @@ func Seal(m, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (c []
 // Open decrypts a ciphertext `c` using nonce `n`, public key `pk` and secret key `sk`.
 // Returns the decrypted message and an error indicating decryption or verification failure.
 // Note: ciphertext `c` requires `BoxZeroBytes` padding on the front.
-func Open(c, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (m []byte, err error) {
+func Open(c []byte, n *[NonceBytes]byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (m []byte, err error) {
 	support.CheckSizeMin(c, ZeroBytes, "ciphertext with padding")
-	support.CheckSize(n, NonceBytes, "nonce")
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(pk == nil, "public key")
 	support.NilPanic(sk == nil, "secret key")
 
@@ -113,9 +113,9 @@ func Open(c, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (m []
 // SealAfterPrecomputation encrypts a message `m` with nonce `n` from a shared secret key `k`.
 // Returns the encrypted message.
 // Note: message `m` requires `ZeroBytes` of padding on the front.
-func SealAfterPrecomputation(m, n []byte, k *[SharedKeyBytes]byte) (c []byte) {
+func SealAfterPrecomputation(m []byte, n *[NonceBytes]byte, k *[SharedKeyBytes]byte) (c []byte) {
 	support.CheckSizeMin(m, ZeroBytes, "message with padding")
-	support.CheckSize(n, NonceBytes, "nonce")
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "shared key")
 
 	c = make([]byte, len(m))
@@ -133,9 +133,9 @@ func SealAfterPrecomputation(m, n []byte, k *[SharedKeyBytes]byte) (c []byte) {
 // OpenAfterPrecomputation decrypts a ciphertext `c` using nonce `n` from a shared secret key `k`.
 // Returns the decrypted message and an error indicating decryption or verification failure.
 // Note: ciphertext `c` requires `BoxZeroBytes` padding on the front.
-func OpenAfterPrecomputation(c, n []byte, k *[SharedKeyBytes]byte) (m []byte, err error) {
+func OpenAfterPrecomputation(c []byte, n *[NonceBytes]byte, k *[SharedKeyBytes]byte) (m []byte, err error) {
 	support.CheckSizeMin(c, ZeroBytes, "ciphertext with padding")
-	support.CheckSize(n, NonceBytes, "nonce")
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "shared key")
 
 	m = make([]byte, len(c))

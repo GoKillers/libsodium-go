@@ -36,7 +36,6 @@ func TestCryptoBox(t *testing.T) {
 	for i := 0; i < testCount; i++ {
 		var test Test
 		var err error
-		var testMac, ciphertext []byte
 		var fail bool
 
 		// Fuzz the test struct
@@ -44,64 +43,64 @@ func TestCryptoBox(t *testing.T) {
 		f.Fuzz(&fail)
 
 		// Generate Keys
-		pk, sk = GenerateKeyFromSeed(test.Seed[:])
+		pk, sk = GenerateKeyFromSeed(&test.Seed)
 
 		// Generate shared key
 		shk := Precompute(pk, sk)
 
 		// Detached encryption test
-		ciphertext, testMac = SealDetached(test.Message, test.Nonce[:], pk, sk)
+		ciphertext, testMac := SealDetached(test.Message, &test.Nonce, pk, sk)
 
 		// Detached encryption after precomputation
-		c, mac := SealDetachedAfterPrecomputation(test.Message, test.Nonce[:], shk)
-		if !bytes.Equal(c, ciphertext) || !bytes.Equal(mac, testMac) {
+		c, mac := SealDetachedAfterPrecomputation(test.Message, &test.Nonce, shk)
+		if !bytes.Equal(c, ciphertext) || !bytes.Equal(mac[:], testMac[:]) {
 			t.Errorf("Detached encryption with shared key failed for %+v", test)
 			t.FailNow()
 		}
 
 		// Encryption
-		ec := Seal(test.Message, test.Nonce[:], pk, sk)
-		if !bytes.Equal(ec, append(testMac, ciphertext...)) {
+		ec := Seal(test.Message, &test.Nonce, pk, sk)
+		if !bytes.Equal(ec, append(testMac[:], ciphertext...)) {
 			t.Errorf("Encryption failed for %+v", test)
 			t.FailNow()
 		}
 
 		// Encryption with shared key
-		ec = SealAfterPrecomputation(test.Message, test.Nonce[:], shk)
-		if !bytes.Equal(ec, append(testMac, ciphertext...)) {
+		ec = SealAfterPrecomputation(test.Message, &test.Nonce, shk)
+		if !bytes.Equal(ec, append(testMac[:], ciphertext...)) {
 			t.Errorf("Encryption with shared key failed for %+v", test)
 			t.FailNow()
 		}
 
 		// Test with incorrect MAC
 		if fail {
-			mac = make([]byte, MACBytes)
-			copy(ec[len(ec)-MACBytes:], mac)
+			mac = new([MACBytes]byte)
+			copy(ec[len(ec)-MACBytes:], mac[:])
 		}
 
 		// Detached decryption test
-		m, err := OpenDetached(c, mac, test.Nonce[:], pk, sk)
+		m, err := OpenDetached(c, mac, &test.Nonce, pk, sk)
 		if checkResult(fail, err, m, test.Message) {
 			t.Errorf("Detached decryption failed for %+v", test)
 			t.FailNow()
 		}
 
 		// Detached decryption with shared key test
-		m, err = OpenDetachedAfterPrecomputation(c, mac, test.Nonce[:], shk)
+		m, err = OpenDetachedAfterPrecomputation(c, mac, &test.Nonce, shk)
 		if checkResult(fail, err, m, test.Message) {
 			t.Errorf("Detached decryption with shared key failed for %+v", test)
 			t.FailNow()
 		}
 
 		// Decryption test
-		m, err = Open(ec, test.Nonce[:], pk, sk)
+		m, err = Open(ec, &test.Nonce, pk, sk)
 		if checkResult(fail, err, m, test.Message) {
 			t.Errorf("Decryption failed for %+v", test)
 			t.FailNow()
 		}
 
 		// Decryption with shared key test
-		m, err = OpenAfterPrecomputation(ec, test.Nonce[:], shk)
+		m, err = OpenAfterPrecomputation(ec, &test.Nonce, shk)
 		if checkResult(fail, err, m, test.Message) {
 			t.Errorf("Decryption with shared key failed for %+v", test)
 			t.FailNow()
@@ -111,7 +110,7 @@ func TestCryptoBox(t *testing.T) {
 		ec = SealAnonymous(test.Message, pk)
 
 		if fail {
-			copy(ec[len(ec)-MACBytes:], mac)
+			copy(ec[len(ec)-MACBytes:], mac[:])
 		}
 
 		m, err = OpenAnonymous(ec, pk, sk)

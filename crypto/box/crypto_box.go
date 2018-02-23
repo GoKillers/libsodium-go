@@ -20,8 +20,8 @@ const (
 )
 
 // GenerateKeyFromSeed returns a keypair generated from a given seed.
-func GenerateKeyFromSeed(seed []byte) (pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) {
-	support.CheckSize(seed, SeedBytes, "seed")
+func GenerateKeyFromSeed(seed *[SeedBytes]byte) (pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) {
+	support.NilPanic(seed == nil, "seed")
 
 	pk = new([PublicKeyBytes]byte)
 	sk = new([SecretKeyBytes]byte)
@@ -63,7 +63,7 @@ func Precompute(pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (k *[SharedK
 
 // Seal encrypts a message `m` using nonce `n`, public key `pk` and secret key `sk`.
 // Returns a ciphertext.
-func Seal(m, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (c []byte) {
+func Seal(m []byte, n *[NonceBytes]byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (c []byte) {
 	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(pk == nil, "public key")
 	support.NilPanic(sk == nil, "secret key")
@@ -83,9 +83,9 @@ func Seal(m, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (c []
 
 // Open decrypts a ciphertext `c` using nonce `n`, public key `pk` and secret key `sk`.
 // Returns the decrypted message and an error indicating decryption or verification failure.
-func Open(c, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (m []byte, err error) {
+func Open(c []byte, n *[NonceBytes]byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (m []byte, err error) {
 	support.CheckSizeMin(c, MACBytes, "ciphertext")
-	support.CheckSize(n, NonceBytes, "nonce")
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(pk == nil, "public key")
 	support.NilPanic(sk == nil, "secret key")
 
@@ -108,8 +108,8 @@ func Open(c, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (m []
 
 // SealAfterPrecomputation encrypts a message `m` with nonce `n` from a shared secret key `k`.
 // Returns the encrypted message.
-func SealAfterPrecomputation(m, n []byte, k *[SharedKeyBytes]byte) (c []byte) {
-	support.CheckSize(n, NonceBytes, "nonce")
+func SealAfterPrecomputation(m []byte, n *[NonceBytes]byte, k *[SharedKeyBytes]byte) (c []byte) {
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "shared key")
 
 	c = make([]byte, len(m)+MACBytes)
@@ -126,9 +126,9 @@ func SealAfterPrecomputation(m, n []byte, k *[SharedKeyBytes]byte) (c []byte) {
 
 // OpenAfterPrecomputation decrypts a ciphertext `c` using nonce `n` from a shared secret key `k`.
 // Returns the decrypted message and an error indicating decryption or verification failure.
-func OpenAfterPrecomputation(c, n []byte, k *[SharedKeyBytes]byte) (m []byte, err error) {
+func OpenAfterPrecomputation(c []byte, n *[NonceBytes]byte, k *[SharedKeyBytes]byte) (m []byte, err error) {
 	support.CheckSizeMin(c, MACBytes, "ciphertext")
-	support.CheckSize(n, NonceBytes, "nonce")
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "shared key")
 
 	m = make([]byte, len(c)-MACBytes)
@@ -149,13 +149,13 @@ func OpenAfterPrecomputation(c, n []byte, k *[SharedKeyBytes]byte) (m []byte, er
 
 // SealDetached encrypts a message `m` using nonce `n`, public key `pk` and secret key `sk`.
 // Returns a ciphertext and an authentication tag.
-func SealDetached(m, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (c, mac []byte) {
-	support.CheckSize(n, NonceBytes, "nonce")
+func SealDetached(m []byte, n *[NonceBytes]byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (c []byte, mac *[MACBytes]byte) {
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(pk == nil, "public key")
 	support.NilPanic(sk == nil, "secret key")
 
 	c = make([]byte, len(m))
-	mac = make([]byte, MACBytes)
+	mac = new([MACBytes]byte)
 
 	C.crypto_box_detached(
 		(*C.uchar)(support.BytePointer(c)),
@@ -171,9 +171,9 @@ func SealDetached(m, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byt
 
 // OpenDetached decrypts a ciphertext `c` using nonce `n`, public key `pk` and secret key `sk`.
 // Returns the decrypted message and an error indicating decryption or verification failure.
-func OpenDetached(c, mac, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (m []byte, err error) {
-	support.CheckSize(mac, MACBytes, "nonce")
-	support.CheckSize(n, NonceBytes, "nonce")
+func OpenDetached(c []byte, mac *[MACBytes]byte, n *[NonceBytes]byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) (m []byte, err error) {
+	support.NilPanic(mac == nil, "mac")
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(pk == nil, "public key")
 	support.NilPanic(sk == nil, "secret key")
 
@@ -197,12 +197,12 @@ func OpenDetached(c, mac, n []byte, pk *[PublicKeyBytes]byte, sk *[SecretKeyByte
 
 // SealDetachedAfterPrecomputation encrypts a message `m` with nonce `n` from a shared secret key `k`.
 // Returns a ciphertext and an authentication tag.
-func SealDetachedAfterPrecomputation(m, n []byte, k *[SharedKeyBytes]byte) (c, mac []byte) {
-	support.CheckSize(n, NonceBytes, "nonce")
+func SealDetachedAfterPrecomputation(m []byte, n *[NonceBytes]byte, k *[SharedKeyBytes]byte) (c []byte, mac *[MACBytes]byte) {
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "shared key")
 
 	c = make([]byte, len(m))
-	mac = make([]byte, MACBytes)
+	mac = new([MACBytes]byte)
 
 	C.crypto_box_detached_afternm(
 		(*C.uchar)(support.BytePointer(c)),
@@ -217,9 +217,9 @@ func SealDetachedAfterPrecomputation(m, n []byte, k *[SharedKeyBytes]byte) (c, m
 
 // OpenDetachedAfterPrecomputation decrypts a ciphertext `c` using nonce `n` from a shared secret key `k`.
 // Returns the decrypted message and an error indicating decryption or verification failure.
-func OpenDetachedAfterPrecomputation(c, mac, n []byte, k *[SharedKeyBytes]byte) (m []byte, err error) {
-	support.CheckSize(mac, MACBytes, "nonce")
-	support.CheckSize(n, NonceBytes, "nonce")
+func OpenDetachedAfterPrecomputation(c []byte, mac *[MACBytes]byte, n *[NonceBytes]byte, k *[SharedKeyBytes]byte) (m []byte, err error) {
+	support.NilPanic(mac == nil, "mac")
+	support.NilPanic(n == nil, "nonce")
 	support.NilPanic(k == nil, "shared key")
 
 	m = make([]byte, len(c))

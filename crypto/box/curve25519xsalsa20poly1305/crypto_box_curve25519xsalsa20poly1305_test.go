@@ -47,16 +47,16 @@ func TestCryptoBoxSalsa(t *testing.T) {
 		test.Message = append(make([]byte, ZeroBytes), test.Message...)
 
 		// Generate Keys
-		pk, sk = GenerateKeyFromSeed(test.Seed[:])
+		pk, sk = GenerateKeyFromSeed(&test.Seed)
 
 		// Generate shared key
 		shk := Precompute(pk, sk)
 
 		// Encryption
-		ciphertext = Seal(test.Message, test.Nonce[:], pk, sk)
+		ciphertext = Seal(test.Message, &test.Nonce, pk, sk)
 
 		// Encryption with context
-		ec := SealAfterPrecomputation(test.Message, test.Nonce[:], shk)
+		ec := SealAfterPrecomputation(test.Message, &test.Nonce, shk)
 		if !bytes.Equal(ec, ciphertext) {
 			t.Errorf("Encryption with shared key failed for %+v:", test)
 			t.FailNow()
@@ -68,14 +68,14 @@ func TestCryptoBoxSalsa(t *testing.T) {
 		}
 
 		// Decryption test
-		m, err = Open(ec, test.Nonce[:], pk, sk)
+		m, err = Open(ec, &test.Nonce, pk, sk)
 		if checkResult(fail, err, m, test.Message) {
 			t.Errorf("Decryption failed for %+v", test)
 			t.FailNow()
 		}
 
 		// Decryption with shared key test
-		m, err = OpenAfterPrecomputation(ec, test.Nonce[:], shk)
+		m, err = OpenAfterPrecomputation(ec, &test.Nonce, shk)
 		if checkResult(fail, err, m, test.Message) {
 			t.Errorf("Decryption with shared key failed for %+v", test)
 			t.FailNow()
