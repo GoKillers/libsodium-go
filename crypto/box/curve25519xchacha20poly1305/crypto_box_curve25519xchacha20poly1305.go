@@ -19,8 +19,8 @@ const (
 	SealBytes      = C.crypto_box_curve25519xchacha20poly1305_SEALBYTES      // Overhead of a sealed encryption
 )
 
-// GenerateKeysFromSeed returns a keypair generated from a given seed.
-func GenerateKeysFromSeed(seed []byte) (pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) {
+// GenerateKeyFromSeed returns a keypair generated from a given seed.
+func GenerateKeyFromSeed(seed []byte) (pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) {
 	support.CheckSize(seed, SeedBytes, "seed")
 
 	pk = new([PublicKeyBytes]byte)
@@ -34,8 +34,8 @@ func GenerateKeysFromSeed(seed []byte) (pk *[PublicKeyBytes]byte, sk *[SecretKey
 	return
 }
 
-// GenerateKeys returns a keypair.
-func GenerateKeys() (pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) {
+// GenerateKey returns a keypair.
+func GenerateKey() (pk *[PublicKeyBytes]byte, sk *[SecretKeyBytes]byte) {
 	pk = new([PublicKeyBytes]byte)
 	sk = new([SecretKeyBytes]byte)
 

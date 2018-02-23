@@ -22,11 +22,11 @@ func checkResult(fail bool, err error, a, b []byte) bool {
 }
 
 func TestCryptoBox(t *testing.T) {
-	// Test if GenerateKeys creates a non-zero key
-	pk, sk := GenerateKeys()
+	// Test if GenerateKey creates a non-zero key
+	pk, sk := GenerateKey()
 	zeroes := new([PublicKeyBytes]byte)
 	if *pk == *zeroes || *sk == *zeroes {
-		t.Error("GenerateKeys generated an all zero key.")
+		t.Error("GenerateKey generated an all zero key.")
 	}
 
 	// Fuzzing
@@ -44,7 +44,7 @@ func TestCryptoBox(t *testing.T) {
 		f.Fuzz(&fail)
 
 		// Generate Keys
-		pk, sk = GenerateKeysFromSeed(test.Seed[:])
+		pk, sk = GenerateKeyFromSeed(test.Seed[:])
 
 		// Generate shared key
 		shk := Precompute(pk, sk)

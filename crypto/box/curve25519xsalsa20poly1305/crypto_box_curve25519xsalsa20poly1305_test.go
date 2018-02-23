@@ -22,11 +22,11 @@ func checkResult(fail bool, err error, a, b []byte) bool {
 }
 
 func TestCryptoBoxSalsa(t *testing.T) {
-	// Test if GenerateKeysFromSeed
-	pk, sk := GenerateKeys()
+	// Test if GenerateKeyFromSeed
+	pk, sk := GenerateKey()
 	zeroes := new([PublicKeyBytes]byte)
 	if *pk == *zeroes || *sk == *zeroes {
-		t.Error("GenerateKeys generated an all zero key.")
+		t.Error("GenerateKey generated an all zero key.")
 	}
 
 	// Fuzzing
@@ -47,7 +47,7 @@ func TestCryptoBoxSalsa(t *testing.T) {
 		test.Message = append(make([]byte, ZeroBytes), test.Message...)
 
 		// Generate Keys
-		pk, sk = GenerateKeysFromSeed(test.Seed[:])
+		pk, sk = GenerateKeyFromSeed(test.Seed[:])
 
 		// Generate shared key
 		shk := Precompute(pk, sk)
